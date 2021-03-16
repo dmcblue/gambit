@@ -1,0 +1,129 @@
+{
+	"version": "0.1.0",
+	
+	"requirements": [{
+		"name": "git",
+		"command": "git"
+	},{
+		"name": "haxe",
+		"command": "haxe",
+		"testArgument": "-version"
+	},{
+		"name": "php",
+		"command": "php"
+	},{
+		"name": "composer",
+		"command": "composer"
+	},{
+		"name": "copy",
+		"command": "cp",
+		"testArgument": "-version",
+		"windows": {
+			"command": "copy",
+			"testArgument": "/?"
+		}
+	}],
+		
+	"tasks": [{
+		"name": "init:git",
+		"description": "Initializes git submodules",
+		"groups": [{
+			"name": "init",
+			"rank": 1
+		}],
+		"command": "git",
+		"arguments": ["submodule","init"]
+	},{
+		"name": "init:code",
+		"description": "Fetches git submodule dependencies",
+		"groups": [{
+			"name": "init",
+			"rank": 2
+		}],
+		"command": "git",
+		"arguments": ["submodule","update"]
+	},{
+		"name": "init:php",
+		"description": "Gets PHP dependencies",
+		"groups": [{
+			"name": "init",
+			"rank": 3
+		}],
+		"command": "composer",
+		"arguments": ["install"]
+	},{
+		"name": "init:utest",
+		"description": "Installs haxe-utest",
+		"groups": [{
+			"name": "init",
+			"rank": 4
+		}],
+		"command": "haxelib",
+		"arguments": ["install", "utest"]
+	},
+	
+	{
+		"name": "update:php",
+		"description": "Gets PHP dependencies",
+		"groups": [{
+			"name": "update",
+			"rank": 2
+		}],
+		"command": "composer",
+		"arguments": ["update"]
+	},
+	
+	{
+		"name": "build:haxe",
+		"description": "Transpiles Haxe to PHP",
+		"groups": [{
+			"name": "build",
+			"rank": 1
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-cp", "src",
+			"-cp", "common/src",
+            "-php", "dist/",
+			"-main", "dmcblue.financialApp.Main"
+		]
+	},{
+		"name": "build:php",
+		"description": "Resets Composer autoload cache",
+		"groups": [{
+			"name": "build",
+			"rank": 2
+		}],
+		"command": "composer",
+		"arguments": [
+            "dump-autoload"
+        ]
+	},
+
+	{
+		"name": "test:gambit",
+		"description": "Runs all tests for the gambit library",
+		"groups": [{
+			"name": "test",
+			"rank": 0
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-lib", "utest",
+			"-cp", "src",
+			"--interp",
+			"--main", "dmcblue.gambit.Test"
+		]
+	},
+
+	{
+		"name": "try",
+		"description": "Runs a test",
+		"command": "haxe",
+		"arguments": [
+			"-cp", "src",
+			"--interp",
+			"--main", "dmcblue.gambit.Main"
+		]
+	}]
+}
