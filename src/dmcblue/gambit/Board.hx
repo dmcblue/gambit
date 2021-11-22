@@ -1,5 +1,6 @@
 package dmcblue.gambit;
 
+import dmcblue.gambit.Position;
 import haxe.iterators.StringKeyValueIteratorUnicode;
 
 using StringTools;
@@ -43,7 +44,7 @@ class Board {
 		for(i => row in this.board) {
 			for (j => cell in row) {
 				if (cell == team) {
-					positions.push({ x: j, y: i });
+					positions.push(new Position(j, i));
 				}
 			}
 		}
@@ -53,28 +54,67 @@ class Board {
 
 	public function getMoves(position:Position) {
 		var moves:Array<Position> = [];
-		// any diagonal
-		for (i in (position.x - 1)...(position.x + 2)) {
-			if (i > -1 && i < this.board.length) {
-				for (j in (position.y - 1)...(position.y + 2)) {
-					if (j > -1 && j < this.board[i].length) {
-						if (this.board[i][j] == Piece.NONE) {
-							moves.push({ x: j, y: i });
-						}
-					}
+		var piece:Piece = this.pieceAt(position);
+		// any jump over an enemy piece
+		var possibleMoves:Array<Position> = [
+			new Position(-2, -2),
+			new Position(0, -2),
+			new Position(2, -2),
+			new Position(-2, 0),
+			new Position(2, 0),
+			new Position(-2, 2),
+			new Position(0, 2),
+			new Position(2, 2)
+		];
+		for (move in possibleMoves) {
+			// var destination = new Position(position.x + move.x, position.y + move.y);
+			var destination = position + move;
+			if (position != destination && this.isInBounds(destination) && this.pieceAt(destination) == Piece.NONE) {
+				var middle = this.midPoint(position, destination);
+				var middlePiece = this.pieceAt(middle);
+
+				if (middlePiece != piece && middlePiece != Piece.NONE) {
+					moves.push(destination);
 				}
 			}
 		}
-		// any jump over an enemy piece
-
 
 		return moves;
 	}
 
 	public function debugString(?position:Position, ?moves:Array<Position>) {
-		Sys.println();
+		// Sys.println();
 		if (position != null) {
-		Sys.println('x: ${}')
+			Sys.println('x: ${position.x}, y: ${position.y}');
 		}
+	}
+
+	public function isInBounds(position:Position) {
+		return position.x > -1 && position.x < this.board[0].length
+			&& position.y > -1 && position.y < this.board.length;
+	}
+
+	public function midPoint(here:Position, there:Position):Position {
+		var distX = Std.int(Math.abs(Math.floor((here.x - there.x)/2)));
+		var distY = Std.int(Math.abs(Math.floor((here.y - there.y)/2)));
+
+		var position = here.clone();
+		if (here.x > there.x) {
+			position.x = here.x - distX;
+		} else if (here.x < there.x) {
+			position.x = here.x + distX;
+		}
+
+		if (here.y > there.y) {
+			position.y = here.y - distY;
+		} else if (here.y < there.y) {
+			position.y = here.y + distY;
+		}
+
+		return position;
+	}
+
+	public function pieceAt(position:Position) {
+		return this.board[position.y][position.x];
 	}
 }

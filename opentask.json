@@ -9,12 +9,6 @@
 		"command": "haxe",
 		"testArgument": "-version"
 	},{
-		"name": "php",
-		"command": "php"
-	},{
-		"name": "composer",
-		"command": "composer"
-	},{
 		"name": "copy",
 		"command": "cp",
 		"testArgument": "-version",
@@ -43,15 +37,6 @@
 		"command": "git",
 		"arguments": ["submodule","update"]
 	},{
-		"name": "init:php",
-		"description": "Gets PHP dependencies",
-		"groups": [{
-			"name": "init",
-			"rank": 3
-		}],
-		"command": "composer",
-		"arguments": ["install"]
-	},{
 		"name": "init:utest",
 		"description": "Installs haxe-utest",
 		"groups": [{
@@ -60,17 +45,6 @@
 		}],
 		"command": "haxelib",
 		"arguments": ["install", "utest"]
-	},
-	
-	{
-		"name": "update:php",
-		"description": "Gets PHP dependencies",
-		"groups": [{
-			"name": "update",
-			"rank": 2
-		}],
-		"command": "composer",
-		"arguments": ["update"]
 	},
 	
 	{
@@ -87,17 +61,6 @@
             "-php", "dist/",
 			"-main", "dmcblue.financialApp.Main"
 		]
-	},{
-		"name": "build:php",
-		"description": "Resets Composer autoload cache",
-		"groups": [{
-			"name": "build",
-			"rank": 2
-		}],
-		"command": "composer",
-		"arguments": [
-            "dump-autoload"
-        ]
 	},
 
 	{
