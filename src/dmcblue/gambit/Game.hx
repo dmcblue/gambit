@@ -5,12 +5,13 @@ import dmcblue.gambit.errors.OccupiedSpaceError;
 import dmcblue.gambit.errors.WrongTeamError;
 import dmcblue.gambit.Board;
 import dmcblue.gambit.Display;
+import dmcblue.gambit.GameMaster;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import interealmGames.common.errors.Error;
 
-class Game {
+class Game implements GameMaster {
 	public var board:Board;
 	public var currentPlayer:Piece;
 	public var display:Display;
@@ -20,20 +21,49 @@ class Game {
 		this.display = display;
 	}
 
-	// should be in Board?
-	public function isValidMove(move:Move):Null<Error> {
-		var start = this.board.pieceAt(move.from);
-		if (start != this.currentPlayer) {
-			return new WrongTeamError(start);
-		}
-		var end = this.board.pieceAt(move.to);
-		if (end != Piece.NONE) {
-			return new OccupiedSpaceError(move.to, end);
+	/**
+		If a player is able to make multi-jump moves, requests that user input
+		and allows the player to skip subsequent jumps.
+	**/
+	public function getFollowUpMove(position:Position) {
+		var move: Move = {
+			from: new Position(0, 0),
+			to: new Position(0, 0)
+		};
+		var isValidMove:Bool = false;
+		while (isValidMove == false) {
+			move = this.display.requestFollowUpMove(
+				this.currentPlayer,
+				position,
+				this.board.getMoves(position),
+				this
+			);
+
+			if (move == null) {
+				return null;
+			}
+
+			var error = this.isValidMove(move);
+			if (error == null) {
+				isValidMove = true;
+			} else {
+				this.display.displayError(error);
+			}
 		}
 
-		return null;
+		return move;
 	}
 
+	/**
+
+	**/
+	public function getMoves(position:Position):Array<Position> {
+		return this.board.getMoves(position);
+	}
+
+	/**
+		Requests user input for an initial move and checks validity.
+	**/
 	public function getNextMove(positions:Array<Position>):Null<Move> {
 		var hasMoves = false;
 		for(position in positions) {
@@ -70,45 +100,28 @@ class Game {
 		return move;
 	}
 
-	public function getFollowUpMove(position:Position) {
-		var move: Move = {
-			from: new Position(0, 0),
-			to: new Position(0, 0)
-		};
-		var isValidMove:Bool = false;
-		while (isValidMove == false) {
-			move = this.display.requestFollowUpMove(
-				this.currentPlayer,
-				position,
-				this.board.getMoves(position),
-				this
-			);
-
-			if (move == null) {
-				return null;
-			}
-
-			var error = this.isValidMove(move);
-			if (error == null) {
-				isValidMove = true;
-			} else {
-				this.display.displayError(error);
-			}
+	/**
+		Determines if a move is valid
+		@TODO Should this be in the Board class?
+	**/
+	public function isValidMove(move:Move):Null<Error> {
+		var start = this.board.pieceAt(move.from);
+		if (start != this.currentPlayer) {
+			return new WrongTeamError(start);
+		}
+		var end = this.board.pieceAt(move.to);
+		if (end != Piece.NONE) {
+			return new OccupiedSpaceError(move.to, end);
 		}
 
-		return move;
-	}
-
-	// this should be part of an interface and the display be changed accordingly
-	public function getMoves(position:Position):Array<Position> {
-		return this.board.getMoves(position);
+		return null;
 	}
 
 	public function run() {
 		var playing = true;
 		while (playing) {
 			this.board = Board.newGame();
-			while(!this.board.isOver()) {
+			while(this.board.hasAnyMoreMoves(this.currentPlayer)) {
 				var move = this.getNextMove(this.board.getPositionsWithMoves(this.currentPlayer));
 				if (move != null) {
 					var currentMove = move.to;

@@ -12,6 +12,6 @@ interface Display {
 	public function displayError(error:Error):Void;
 	public function endGame(scores:Map<Piece,Int>, board:Board):Void;
 	public function playAgain():Bool;
-	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:Game):Move;
-	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:Game):Move;
+	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Move;
+	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Move;
 }

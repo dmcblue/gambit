@@ -27,7 +27,7 @@ class Display implements DisplayInterface {
 		);
 	}
 
-	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:Game):Null<Move> {
+	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Null<Move> {
 		Sys.println('');
 		Sys.println(this.boardToString(game.board));
 		var teamStr = this.pieceToString(currentPlayer);
@@ -58,7 +58,7 @@ class Display implements DisplayInterface {
 		};
 	}
 
-	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:Game):Move {
+	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Move {
 		Sys.println('');
 		Sys.println(this.boardToString(game.board));
 		var teamStr = this.pieceToString(currentPlayer);
