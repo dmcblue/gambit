@@ -45,22 +45,25 @@
 		}],
 		"command": "haxelib",
 		"arguments": ["install", "utest"]
-	},
-	
-	{
-		"name": "build:haxe",
-		"description": "Transpiles Haxe to PHP",
+	},{
+		"name": "init:cpp",
+		"description": "Installs haxelib dependencies",
 		"groups": [{
-			"name": "build",
-			"rank": 1
+			"name": "init",
+			"rank": 3
 		}],
-		"command": "haxe",
+		"command": "haxelib",
 		"arguments": [
-			"-cp", "src",
-			"-cp", "common/src",
-            "-php", "dist/",
-			"-main", "dmcblue.financialApp.Main"
-		]
+			"install",
+			"hxcpp"
+		],
+		"windows": {
+			"arguments": [
+				"install",
+				"hxcpp",
+				"minimingw"
+			]
+		}
 	},
 
 	{
@@ -74,19 +77,55 @@
 		"arguments": [
 			"-lib", "utest",
 			"-cp", "src",
+			"-cp", "common/src",
 			"--interp",
 			"--main", "dmcblue.gambit.Test"
 		]
 	},
 
 	{
-		"name": "try",
-		"description": "Runs a test",
+		"name": "run:terminal",
+		"description": "Runs the terminal game",
+		"groups": [{
+			"name": "run",
+			"rank": 0
+		}],
 		"command": "haxe",
 		"arguments": [
 			"-cp", "src",
+			"-cp", "common/src",
 			"--interp",
-			"--main", "dmcblue.gambit.Main"
+			"--main", "dmcblue.gambit.terminal.Main"
 		]
+	},
+
+	{
+		"name": "build:cpp",
+		"description": "Transpiles Haxe to C++",
+		"groups": [{
+			"name": "build",
+			"rank": 1
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-cp", "src",
+			"-cp", "common/src",
+			"--cpp", "bin/cpp",
+			"-main", "dmcblue.gambit.terminal.Main"
+		]
+	},{
+		"name": "build:copy",
+		"description": "Copies the executable into the /bin root and renames",
+		"groups": [{
+			"name": "build",
+			"rank": 2
+		}],
+		"command": "cp",
+		"arguments": ["bin/cpp/Main", "bin/gambit"],
+		"platformSpecifics": {
+			"windows": {
+				"arguments": ["bin\\cpp\\Main.exe",  "/B", "bin\\gambit.exe",  "/B"]
+			}
+		}
 	}]
 }

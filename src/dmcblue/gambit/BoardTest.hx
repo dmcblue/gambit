@@ -1,7 +1,9 @@
 package dmcblue.gambit;
 
+import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.Board;
+import dmcblue.gambit.errors.NotIslandError;
 import utest.Assert;
 import utest.Async;
 import utest.Test;
@@ -10,6 +12,24 @@ typedef MidPointTest = {
 	var here: Position;
 	var there: Position;
 	var expected: Position;
+};
+
+typedef GetIslandTest = {
+	var board: String;
+	var start: Position;
+	var raises: Bool;
+	var expected: Array<Position>;
+};
+
+typedef IsOverTest = {
+	var board: String;
+	var expected: Bool;
+};
+
+typedef CalculateScoreTest = {
+	var board: String;
+	var team: Piece;
+	var expected: Int;
 };
 
 class BoardTest extends Test 
@@ -93,5 +113,151 @@ class BoardTest extends Test
 		return moves.filter(function(move) {
 			return move.x == needle.x && move.y == needle.y;
 		}).length > 0;
+	}
+
+	/**
+	 *
+	 */
+	 public function testGetIsland() {
+		var tests:Array<GetIslandTest> = [{
+			board:
+				'00000000' +
+				'12000000' +
+				'22000000' +
+				'00000000',
+			raises: true,
+			start: new Position(0, 1),
+			expected: [],
+		}, {
+			board:
+				'00000000' +
+				'02010000' +
+				'22000000' +
+				'00000000',
+			raises: false,
+			start: new Position(0, 2),
+			expected: [new Position(0, 2), new Position(1, 1), new Position(1, 2)],
+		}, {
+			board:
+				'00000000' +
+				'02010000' +
+				'22000000' +
+				'00000000',
+			raises: false,
+			start: new Position(3, 1),
+			expected: [new Position(3, 1)],
+		}, {
+			board:
+				'00100000' +
+				'02000000' +
+				'22000000' +
+				'00000000',
+			raises: true,
+			start: new Position(2, 0),
+			expected: [],
+		}, {
+			board: //here
+				'22000002' +
+				'00001001' +
+				'00200002' +
+				'01000101',
+			raises: false,
+			start: new Position(5, 3),
+			expected: [new Position(5, 3)],
+		}];
+
+		for(test in tests) {
+			var board = Board.fromString(test.board);
+			if (test.raises) {
+				Assert.raises(function() {
+					board.getIsland(test.start);
+				}); // could be exact
+			} else {
+				var island = board.getIsland(test.start);
+
+				Assert.same(island, test.expected, test.start.toString());
+			}
+		}
+	}
+	
+	/**
+	 * Basic tests for capitalization
+	 */
+	public function testIsOver() {
+		var tests:Array<IsOverTest> = [{
+			board:
+				'00000000' +
+				'12000000' +
+				'22000000' +
+				'00000000',
+			expected: false,
+		}, {
+			board:
+				'00000000' +
+				'02010000' +
+				'22000000' +
+				'00000000',
+			expected: true,
+		}, {
+			board:
+				'00100000' +
+				'02000000' +
+				'22000000' +
+				'00000000',
+			expected: true, // yes, true
+		}, {
+			board:
+				'00000000' +
+				'00100000' +
+				'22000000' +
+				'02000000',
+			expected: false,
+		}, {
+			board:
+				'00000000' +
+				'11111111' +
+				'22222222' +
+				'00000000',
+			expected: false,
+		}];
+
+		for(test in tests) {
+			var board = Board.fromString(test.board);
+			Assert.equals(board.isOver(), test.expected, test.board);
+		}
+	}
+	
+	public function testCalculateScores() {
+		var tests:Array<CalculateScoreTest> = [{
+			board:
+				'00000000' +
+				'12000000' +
+				'22000000' +
+				'00000000',
+			team: Piece.WHITE,
+			expected: 0
+		}, {
+			board:
+				'22000002' +
+				'00001001' +
+				'00200002' +
+				'01000101',
+			team: Piece.WHITE,
+			expected: 2
+		}, {
+			board:
+				'22000002' +
+				'00001001' +
+				'00200002' +
+				'01000101',
+			team: Piece.BLACK,
+			expected: 3
+		}];
+
+		for (test in tests) {
+			var board = Board.fromString(test.board);
+			var score = board.calculateScore(test.team);
+			Assert.equals(test.expected, score);
+		}
 	}
 }
