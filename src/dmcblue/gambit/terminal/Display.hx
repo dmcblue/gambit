@@ -15,10 +15,102 @@ class Display implements DisplayInterface {
 	static public var COL_IDS = ['1', '2', '3', '4', '5', '6', '7', '8'];
 	public function new() {}
 
+	/**
+		Display the board to user
+	**/
+	public function boardToString(board:Array<Array<Piece>>):String {
+		var str = ' |';
+		for(colId in Display.COL_IDS) {
+			str += '$colId|';
+		}
+		str += '\n------------------\n';
+		for(rowIndex in 0...board.length) {
+			str += '${Display.ROW_IDS[rowIndex]}|';
+			var row = board[rowIndex];
+			var cells:Array<String> = [];
+			for(cell in row) {
+				cells.push(this.pieceToString(cell));
+			}
+			str += cells.join(' ') + '|\n';
+		}
+		str += '------------------\n';
+		return str;
+	}
+
+	/**
+		@implements DisplayInterface
+	**/
 	public function displayError(error:Error):Void {
 		Sys.println(error.message);
 	}
 
+	/**
+		@implements DisplayInterface
+	**/
+	public function endGame(scores:Map<Piece,Int>, game:GameMaster):Void {
+		Sys.println('');
+		Sys.println(this.boardToString(game.getBoard()));
+		Sys.println('');
+		var blackScore = scores.get(Piece.BLACK);
+		var whiteScore = scores.get(Piece.WHITE);
+		var winner = Piece.NONE;
+		if (blackScore > whiteScore) {
+			winner = Piece.BLACK;
+		} else if (whiteScore > blackScore) {
+			winner = Piece.WHITE;
+		}
+		if (winner != Piece.NONE) {
+			var teamStr = this.pieceToString(winner);
+			Sys.println('$winner ($teamStr) is the winner!');
+		} else {
+			Sys.println('Tie game.');
+		}
+		for(team => score in scores) {
+			var teamStr = this.pieceToString(team);
+			Sys.println('$team ($teamStr): $score points');
+		}
+		Sys.println('');
+	}
+
+	/**
+		Savely ends the program
+	**/
+	public function exit() {
+		Sys.println('Goodbye');
+		Sys.exit(0);
+	}
+
+	/**
+		@implements DisplayInterface
+	**/
+	public function getResponse(numOptions:Int, passable:Bool = false):String {
+		var options:Array<String> = [];
+		if (passable) {
+			options.push('p');
+			options.push('P');
+		}
+		for(i in 1...(numOptions + 1)) {
+			options.push('$i');
+		}
+		while (true) {
+			var input = Sys.stdin().readLine();
+			if(input.charCodeAt(0) == 27) { //ESC
+				this.exit();
+			}
+			if(input.toLowerCase() == 'r') {
+				this.rules();
+			}
+			if(options.contains(input)) {
+				return input;
+			}
+
+			Sys.print('Invalid reponse, please try again:');
+		}
+	}
+
+	/**
+		Greets player and gives them general key commands
+	**/
 	public function greetings():Void {
 		Sys.println(
 			'Welcome to Gambit.\n' +
@@ -27,9 +119,76 @@ class Display implements DisplayInterface {
 		);
 	}
 
+	/**
+		Creates a display version of Piece
+	**/
+	public function pieceToString(piece:Piece):String {
+		return switch piece {
+			case Piece.WHITE: 'O';
+			case Piece.BLACK: 'X';
+			case Piece.NONE: ' ';
+			default: '';
+		};
+	}
+
+
+	/**
+		@implements DisplayInterface
+	**/
+	public function playAgain():Bool {
+		Sys.println('Would you like to play again:');
+		var options = ['Yes', 'No'];
+		for(i in 0...options.length) {
+			Sys.println('\t${i + 1}:\t${options[i]}');
+		}
+		var answer = options[Std.parseInt(this.getResponse(options.length+1)) - 1];
+
+		return answer == 'Yes';
+	}
+
+
+	/**
+		Converts a Position to displayable String
+	**/
+	public function positionToString(position:Position):String {
+		return Display.ROW_IDS[position.y] + Display.COL_IDS[position.x];
+	}
+
+	/**
+		@implements DisplayInterface
+	**/
+	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Move {
+		Sys.println('');
+		Sys.println(this.boardToString(game.getBoard()));
+		var teamStr = this.pieceToString(currentPlayer);
+		var positionStr = this.positionToString(position);
+		Sys.println('$currentPlayer ($teamStr) has a follow-up move for Position "$positionStr":');
+		Sys.println('The following moves are available:');
+		for(i in 0...moves.length) {
+			var position = this.positionToString(moves[i]);
+			Sys.println('\t${i + 1}:\t$position');
+		}
+		Sys.println('\tP:\tTo pass');
+		Sys.print('Please enter which move: ');
+		var input = this.getResponse(moves.length, true);
+		if (input.toLowerCase() == 'p') {
+			return null;
+		}
+		var choice = Std.parseInt(input);
+		var to = moves[choice - 1];
+
+		return {
+			to: to,
+			from: position
+		};
+	}
+
+	/**
+		@implements DisplayInterface
+	**/
 	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Null<Move> {
 		Sys.println('');
-		Sys.println(this.boardToString(game.board));
+		Sys.println(this.boardToString(game.getBoard()));
 		var teamStr = this.pieceToString(currentPlayer);
 		Sys.println('Please select the next $currentPlayer ($teamStr) move:');
 		Sys.println('The following pieces are available to move:');
@@ -58,32 +217,9 @@ class Display implements DisplayInterface {
 		};
 	}
 
-	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Move {
-		Sys.println('');
-		Sys.println(this.boardToString(game.board));
-		var teamStr = this.pieceToString(currentPlayer);
-		var positionStr = this.positionToString(position);
-		Sys.println('$currentPlayer ($teamStr) has a follow-up move for Position "$positionStr":');
-		Sys.println('The following moves are available:');
-		for(i in 0...moves.length) {
-			var position = this.positionToString(moves[i]);
-			Sys.println('\t${i + 1}:\t$position');
-		}
-		Sys.println('\tP:\tTo pass');
-		Sys.print('Please enter which move: ');
-		var input = this.getResponse(moves.length, true);
-		if (input.toLowerCase() == 'p') {
-			return null;
-		}
-		var choice = Std.parseInt(input);
-		var to = moves[choice - 1];
-
-		return {
-			to: to,
-			from: position
-		};
-	}
-
+	/**
+		Displays the rules of the game
+	**/
 	public function rules() {
 		Sys.println(
 			['\n\nRules:',
@@ -103,104 +239,6 @@ class Display implements DisplayInterface {
 			'\n\t4 pieces: 7 points',
 			'\n\t5 pieces: 9 points\n'].join(' ')
 		);
-	}
-
-	public function pieceToString(piece:Piece):String {
-		return switch piece {
-			case Piece.WHITE: 'O';
-			case Piece.BLACK: 'X';
-			case Piece.NONE: ' ';
-			default: '';
-		};
-	}
-
-	public function boardToString(board:Board):String {
-		var str = ' |';
-		for(colId in Display.COL_IDS) {
-			str += '$colId|';
-		}
-		str += '\n------------------\n';
-		for(rowIndex in 0...board.board.length) {
-			str += '${Display.ROW_IDS[rowIndex]}|';
-			var row = board.board[rowIndex];
-			var cells:Array<String> = [];
-			for(cell in row) {
-				cells.push(this.pieceToString(cell));
-			}
-			str += cells.join(' ') + '|\n';
-		}
-		str += '------------------\n';
-		return str;
-	}
-
-	public function getResponse(numOptions:Int, passable:Bool = false):String {
-		var options:Array<String> = [];
-		if (passable) {
-			options.push('p');
-			options.push('P');
-		}
-		for(i in 1...(numOptions + 1)) {
-			options.push('$i');
-		}
-		while (true) {
-			var input = Sys.stdin().readLine();
-			if(input.charCodeAt(0) == 27) { //ESC
-				Sys.println('Goodbye');
-				Sys.exit(0);
-			}
-			if(input.toLowerCase() == 'r') {
-				this.rules();
-			}
-			if(options.contains(input)) {
-				return input;
-			}
-
-			Sys.print('Invalid reponse, please try again:');
-		}
-	}
-
-	public function positionToString(position:Position):String {
-		return Display.ROW_IDS[position.y] + Display.COL_IDS[position.x];
-	}
-
-	public function endGame(scores:Map<Piece,Int>, board:Board):Void {
-		Sys.println('');
-		Sys.println(this.boardToString(board));
-		Sys.println('');
-		var blackScore = scores.get(Piece.BLACK);
-		var whiteScore = scores.get(Piece.WHITE);
-		var winner = Piece.NONE;
-		if (blackScore > whiteScore) {
-			winner = Piece.BLACK;
-		} else if (whiteScore > blackScore) {
-			winner = Piece.WHITE;
-		}
-		if (winner != Piece.NONE) {
-			var teamStr = this.pieceToString(winner);
-			Sys.println('$winner ($teamStr) is the winner!');
-		} else {
-			Sys.println('Tie game.');
-		}
-		for(team => score in scores) {
-			var teamStr = this.pieceToString(team);
-			Sys.println('$team ($teamStr): $score points');
-		}
-		Sys.println('');
-	}
-
-	public function playAgain():Bool {
-		Sys.println('Would you like to play again:');
-		var options = ['Yes', 'No'];
-		for(i in 0...options.length) {
-			Sys.println('\t${i + 1}:\t${options[i]}');
-		}
-		var answer = options[Std.parseInt(this.getResponse(options.length+1)) - 1];
-
-		return answer == 'Yes';
-	}
-
-	public function exit() {
-		Sys.exit(0);
 	}
 
 	// public function positionFromString(str:String):Null<Position> {

@@ -22,6 +22,21 @@ class Game implements GameMaster {
 	}
 
 	/**
+		@implements GameMaster
+	**/
+	public function getBoard():Array<Array<Piece>> {
+		var board:Array<Array<Piece>> = [];
+		for(row in this.board.board) {
+			var r:Array<Piece> = [];
+			for(cell in row) {
+				r.push(cell);
+			}
+			board.push(r);
+		}
+		return board;
+	}
+
+	/**
 		If a player is able to make multi-jump moves, requests that user input
 		and allows the player to skip subsequent jumps.
 	**/
@@ -55,7 +70,7 @@ class Game implements GameMaster {
 	}
 
 	/**
-
+		@implements GameMaster
 	**/
 	public function getMoves(position:Position):Array<Position> {
 		return this.board.getMoves(position);
@@ -117,6 +132,9 @@ class Game implements GameMaster {
 		return null;
 	}
 
+	/**
+		Game loop
+	**/
 	public function run() {
 		var playing = true;
 		while (playing) {
@@ -149,7 +167,7 @@ class Game implements GameMaster {
 			var scores:Map<Piece, Int> = new Map();
 			scores.set(Piece.BLACK, this.board.calculateScore(Piece.BLACK));
 			scores.set(Piece.WHITE, this.board.calculateScore(Piece.WHITE));
-			this.display.endGame(scores, this.board);
+			this.display.endGame(scores, this);
 			playing = this.display.playAgain();
 		}
 	}

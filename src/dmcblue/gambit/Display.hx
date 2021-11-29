@@ -8,10 +8,28 @@ import dmcblue.gambit.Position;
 import interealmGames.common.errors.Error;
 
 interface Display {
-	// greeting, start
+	/**
+		Output error to user.
+	**/
 	public function displayError(error:Error):Void;
-	public function endGame(scores:Map<Piece,Int>, board:Board):Void;
+
+	/**
+		Shows the results of the game (winner, score, etc)
+	**/
+	public function endGame(scores:Map<Piece,Int>, game:GameMaster):Void;
+
+	/**
+		Ask user if they would like to play another game
+	**/
 	public function playAgain():Bool;
+
+	/**
+		Gets the move continuing a multistage jump
+	**/
 	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Move;
+
+	/**
+		Asks user for their move for a round
+	**/
 	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Move;
 }
