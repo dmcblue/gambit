@@ -32,7 +32,7 @@ The game ends when any player is unable to make a move on their turn.
 The board is then scored.
 
 Players earn points for each island of pieces they have on the board.
-An island is a group of piece from the same side that does not touch any pieces of the opposing player, including diagonoally.
+An island is a group of piece from the same side that does not touch any pieces of the opposing player, including diagonally.
 Scores are by the number of pieces per island, added up for all islands for a player.
 
 Scores per island:
