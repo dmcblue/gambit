@@ -223,7 +223,7 @@ class Display implements DisplayInterface {
 	public function rules() {
 		Sys.println(
 			['\n\nRules:',
-			'\n\nEach player tates turns making moves.',
+			'\n\nEach player takes turns making moves.',
 			'Pieces are moved by jumping over the opposing teams pieces in any direction.',
 			'The piece that has been jumped over is removed from the board.',
 			'If the move is available, the same piece can make multiple jumps in a row before the turn is over.',
@@ -231,7 +231,7 @@ class Display implements DisplayInterface {
 			'The board is then scored.',
 			'Players earn points for each island of pieces they have on the board.',
 			'An island is a group of piece from the same side that does not touch any pieces of the opposing player, including diagonoally.',
-			'Scores are by the number of piece per island, added up for all island for a player.',
+			'Scores are by the number of pieces per island, added up for all islands for a player.',
 			'\nScores per island:',
 			'\n\t1 piece:  1 point',
 			'\n\t2 pieces: 3 points',
