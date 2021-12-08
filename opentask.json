@@ -46,10 +46,19 @@
 		"command": "haxelib",
 		"arguments": ["install", "utest"]
 	},{
-		"name": "init:cpp",
-		"description": "Installs haxelib dependencies",
+		"name": "init:haxe",
+		"description": "Installs haxe dependencies",
 		"groups": [{
 			"name": "init",
+			"rank": 2
+		}],
+		"command": "opentask",
+		"arguments": ["rungroup", "init:haxe"]
+	},{
+		"name": "init:haxe:cpp",
+		"description": "Installs haxelib dependencies",
+		"groups": [{
+			"name": "init:haxe",
 			"rank": 3
 		}],
 		"command": "haxelib",
@@ -60,10 +69,30 @@
 		"windows": {
 			"arguments": [
 				"install",
-				"hxcpp",
+				"hxcpp;",
+				"haxelib",
+				"install",
 				"minimingw"
 			]
 		}
+	},{
+		"name": "init:haxe:crypto",
+		"description": "Installs haxe-crypto",
+		"groups": [{
+			"name": "init:haxe",
+			"rank": 1
+		}],
+		"command": "haxelib",
+		"arguments": ["install", "haxe-crypto"]
+	},{
+		"name": "init:haxe:dotenv",
+		"description": "Installs haxe dotenv",
+		"groups": [{
+			"name": "init:haxe",
+			"rank": 2
+		}],
+		"command": "haxelib",
+		"arguments": ["install", "dotenv"]
 	},
 
 	{
@@ -80,6 +109,22 @@
 			"-cp", "common/src",
 			"--interp",
 			"--main", "dmcblue.gambit.Test"
+		]
+	},
+	{
+		"name": "test:server",
+		"description": "Runs all tests for the gambit:server library",
+		"groups": [{
+			"name": "test",
+			"rank": 0
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-lib", "utest",
+			"-cp", "src",
+			"-cp", "common/src",
+			"--interp",
+			"--main", "dmcblue.gambit.server.Test"
 		]
 	},
 
@@ -127,5 +172,27 @@
 				"arguments": ["bin\\cpp\\Main.exe",  "/B", "bin\\gambit.exe",  "/B"]
 			}
 		}
+	},
+	
+	
+	{
+		"name": "build:haxe",
+		"description": "Transpiles Haxe to PHP",
+		"groups": [{
+			"name": "build:server",
+			"rank": 1
+		}],
+		"command": "haxe",
+		"arguments": [
+            "-lib", "haxe-crypto",
+            "-lib", "dotenv",
+            "-cp", "src",
+            "-cp", "common/src",
+            "-cp", "persistence/src", 
+            "-cp", "server/src", 
+			"-D", "php-prefix=EB",
+            "-php", "bin", 
+            "-main", "dmcblue.gambit.server.Main"
+        ]
 	}]
 }

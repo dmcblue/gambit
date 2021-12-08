@@ -1,3 +1,9 @@
 [submodule "common"]
 	path = common
 	url = git@github.com:interealm-games/common.git
+[submodule "server"]
+	path = server
+	url = git@github.com:interealm-games/server
+[submodule "persistence"]
+	path = persistence
+	url = git@github.com:interealm-games/persistence
