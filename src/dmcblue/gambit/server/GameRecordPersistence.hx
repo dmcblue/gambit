@@ -1,6 +1,7 @@
 package dmcblue.gambit.server;
 
 import interealmGames.persistence.FilePersistence;
+import interealmGames.persistence.FileSystemConnection;
 import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.GameRecordSerializer;
 /**
@@ -8,8 +9,8 @@ import dmcblue.gambit.server.GameRecordSerializer;
  */
 class GameRecordPersistence extends FilePersistence<String, GameRecord> 
 {
-	public function new(basePath:String) 
+	public function new(fileConnection:FileSystemConnection, basePath:String)
 	{
-		super(basePath, 'id', new GameRecordSerializer(), 'gm');
+		super(fileConnection, basePath, 'id', new GameRecordSerializer(), 'gm');
 	}
 }

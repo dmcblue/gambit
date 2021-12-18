@@ -121,8 +121,12 @@
 		"command": "haxe",
 		"arguments": [
 			"-lib", "utest",
+			"-lib", "haxe-crypto",
+			"-lib", "dotenv",
 			"-cp", "src",
 			"-cp", "common/src",
+			"-cp", "persistence/src",
+			"-cp", "server/src",
 			"--interp",
 			"--main", "dmcblue.gambit.server.Test"
 		]
@@ -184,15 +188,15 @@
 		}],
 		"command": "haxe",
 		"arguments": [
-            "-lib", "haxe-crypto",
-            "-lib", "dotenv",
-            "-cp", "src",
-            "-cp", "common/src",
-            "-cp", "persistence/src", 
-            "-cp", "server/src", 
+			"-lib", "haxe-crypto",
+			"-lib", "dotenv",
+			"-cp", "src",
+			"-cp", "common/src",
+			"-cp", "persistence/src",
+			"-cp", "server/src",
 			"-D", "php-prefix=EB",
-            "-php", "bin", 
-            "-main", "dmcblue.gambit.server.Main"
-        ]
+			"-php", "bin",
+			"-main", "dmcblue.gambit.server.Main"
+		]
 	}]
 }
