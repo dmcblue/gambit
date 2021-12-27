@@ -1,6 +1,7 @@
 package dmcblue.gambit.server;
 
 import interealmGames.server.http.Error;
+import interealmGames.server.http.ErrorObject;
 import interealmGames.common.uuid.Uuid;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import haxe.Json;
@@ -17,6 +18,10 @@ import utest.Test;
 
 class HandlersMoveTest extends Test 
 {
+	public function setup() {
+		Test.resetDatabase();
+	}
+
 	public function testMove() {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
@@ -57,5 +62,261 @@ class HandlersMoveTest extends Test
 		Assert.isTrue(Reflect.hasField(response, 'player'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
 		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
+	}
+
+	public function testNotFound() {
+		var playerId = Uuid.v4();
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 0
+				}
+			},
+			player: playerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testGameUnstarted() {
+		var playerId = Uuid.v4();
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			playerId, // black
+			otherPlayerId, // white
+			GameState.WAITING
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 0
+				}
+			},
+			player: playerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testGameFinished() {
+		var playerId = Uuid.v4();
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			playerId, // black
+			otherPlayerId, // white
+			GameState.DONE
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 0
+				}
+			},
+			player: playerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testBadPlayer() {
+		var randomId = Uuid.v4();
+		var playerId = Uuid.v4();
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			playerId, // black
+			otherPlayerId, // white
+			GameState.PLAYING
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 0
+				}
+			},
+			player: randomId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testWrongPlayer() {
+		var playerId = Uuid.v4();
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			playerId, // black
+			otherPlayerId, // white
+			GameState.PLAYING
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 0
+				}
+			},
+			player: otherPlayerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testWrongPiece() {
+		var playerId = Uuid.v4();
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			playerId, // black
+			otherPlayerId, // white
+			GameState.PLAYING
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 1
+				},
+				to: {
+					x: 2,
+					y: 3
+				}
+			},
+			player: playerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testOccupiedSpace() {
+		var playerId = Uuid.v4();
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 1
+				}
+			},
+			player: playerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testNoJump() {
+		var playerId = Uuid.v4();
+		var params:MoveParams = {
+			move: {
+				from: {
+					x: 2,
+					y: 2
+				},
+				to: {
+					x: 2,
+					y: 3
+				}
+			},
+			player: playerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/move",
+			type: RequestType.POST,
+			data: Json.stringify(params)
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 }

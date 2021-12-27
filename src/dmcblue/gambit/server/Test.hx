@@ -21,7 +21,7 @@ import interealmGames.persistence.InMemoryFileSystemConnection;
 class Test {
 	static public var server:Server;
 	static public var persistence:Persistence;
-	static public var fileConnection:FileSystemConnection;
+	static public var fileConnection:InMemoryFileSystemConnection;
 
 	public static function main() {
 		Test.fileConnection = new InMemoryFileSystemConnection();
@@ -37,5 +37,9 @@ class Test {
 		runner.addCase(new HandlersPassTest());
 		Report.create(runner);
 		runner.run();
+	}
+
+	public static function resetDatabase() {
+		Test.fileConnection.clear();
 	}
 }

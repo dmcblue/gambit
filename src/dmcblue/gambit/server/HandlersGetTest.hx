@@ -1,6 +1,7 @@
 package dmcblue.gambit.server;
 
 import interealmGames.server.http.Error;
+import interealmGames.server.http.ErrorObject;
 import interealmGames.common.uuid.Uuid;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import haxe.Json;
@@ -17,6 +18,10 @@ import utest.Test;
 
 class HandlersGetTest extends Test 
 {
+	public function setup() {
+		Test.resetDatabase();
+	}
+
 	public function testGet() {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
@@ -46,5 +51,15 @@ class HandlersGetTest extends Test
 		Assert.equals(board, Reflect.field(response, 'board'));
 		Assert.equals(GameState.PLAYING, Reflect.field(response, 'state'));
 		Assert.isFalse(Reflect.hasField(response, 'player'));
+	}
+
+	public function testNotFound() {
+		var request:Request = new Request({
+			url: '/game/1234',
+			type: RequestType.GET
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 }

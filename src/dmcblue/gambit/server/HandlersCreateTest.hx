@@ -3,6 +3,7 @@ package dmcblue.gambit.server;
 import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.GameRecord;
 import interealmGames.server.http.Error;
+import interealmGames.server.http.ErrorObject;
 import interealmGames.common.uuid.Uuid;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import haxe.Json;
@@ -18,6 +19,10 @@ import utest.Test;
 
 class HandlersCreateTest extends Test 
 {
+	public function setup() {
+		Test.resetDatabase();
+	}
+
 	public function testCreate() {
 		var request:Request = new Request({
 			url: "/create",
@@ -42,5 +47,44 @@ class HandlersCreateTest extends Test
 		Assert.equals(response.canPass, game.canPass);
 		Assert.equals(response.board, game.board.toString());
 		Assert.equals(response.state, game.state);
+	}
+
+	public function testNoParams() {
+		var request:Request = new Request({
+			url: "/create",
+			type: RequestType.POST
+		});
+
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testBadParams1() {
+		var request:Request = new Request({
+			url: "/create",
+			type: RequestType.POST,
+			data: Json.stringify({
+				startingAs: 3
+			})
+		});
+
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testStringParams() {
+		var request:Request = new Request({
+			url: "/create",
+			type: RequestType.POST,
+			data: Json.stringify({
+				startingAs: '2'
+			})
+		});
+
+		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.isTrue(Reflect.hasField(response, 'id'));
+		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'id')));
 	}
 }

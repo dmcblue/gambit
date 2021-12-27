@@ -3,6 +3,7 @@ package dmcblue.gambit.server;
 import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.GameRecord;
 import interealmGames.server.http.Error;
+import interealmGames.server.http.ErrorObject;
 import interealmGames.common.uuid.Uuid;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import haxe.Json;
@@ -18,6 +19,10 @@ import utest.Test;
 
 class HandlersJoinTest extends Test 
 {
+	public function setup() {
+		Test.resetDatabase();
+	}
+
 	public function testJoin() {
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -43,5 +48,57 @@ class HandlersJoinTest extends Test
 		Assert.isTrue(Reflect.hasField(response, 'player'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
 		Assert.notEquals(otherPlayerId, Reflect.field(response, 'player'));
+	}
+
+	public function testNotFound() {
+		var request:Request = new Request({
+			url: '/game/1234/join',
+			type: RequestType.GET
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testGameInProgress() {
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			otherPlayerId,
+			"",
+			GameState.PLAYING
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var request:Request = new Request({
+			url: "/game/1234/join",
+			type: RequestType.GET
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
+	}
+
+	public function testGameFinished() {
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			otherPlayerId,
+			"",
+			GameState.DONE
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var request:Request = new Request({
+			url: "/game/1234/join",
+			type: RequestType.GET
+		});
+		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, Reflect.field(response, 'status'));
+		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 }

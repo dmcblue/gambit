@@ -26,12 +26,14 @@ import dmcblue.gambit.server.parameters.MoveParams;
 using interealmGames.common.StringToolsExtension;
 
 class Handlers {
+	static public var ERROR_INVALID_PARAMETERS = "Invalid parameters.";
 	static public var ERROR_GAME_DNE = "There is no game with the ID '%s'";
 	static public var ERROR_GAME_FINISHED = "This game is already finished.";
 	static public var ERROR_GAME_IN_PROGRESS = "You cannot join, this game is already in progress.";
 	static public var ERROR_GAME_INVALID = "The game data is bad, please create a new game.";
 	static public var ERROR_GAME_INVALID_MOVE = "Move is invalid.";
 	static public var ERROR_GAME_INVALID_PLAYER = "Player is invalid.";
+	static public var ERROR_GAME_INVALID_PIECE = "'%s' is not a valid Piece.";
 	static public var ERROR_GAME_NOT_PASSABLE = "Cannot pass this turn.";
 	static public var ERROR_GAME_NOT_STARTED = "This game has not started yet.";
 	static public var ERROR_GAME_NOT_TURN = "Not this players turn.";
@@ -44,11 +46,11 @@ class Handlers {
 	public function getHandlers():Array<RequestHandler> {
 		var handlers:Array<RequestHandler> = [];
 
-		handlers.push(this.create());
-		handlers.push(this.get());
-		handlers.push(this.join());
-		handlers.push(this.move());
-		handlers.push(this.pass());
+		handlers.push(this.wrap(this.create()));
+		handlers.push(this.wrap(this.get()));
+		handlers.push(this.wrap(this.join()));
+		handlers.push(this.wrap(this.move()));
+		handlers.push(this.wrap(this.pass()));
 		
 		return handlers;
 	}
@@ -60,8 +62,8 @@ class Handlers {
 			handler: function(request:Request) {
 				var game = GameRecord.create();
 
-				var content = request.getData();
-				var params:CreateParams = cast Json.parse(content);
+				var params:CreateParams = cast parseParams(request, ['startingAs']);
+				this.validatePiece(cast params.startingAs);
 				var playerId:UuidV4 = Uuid.v4();
 				if (params.startingAs == Piece.BLACK) {
 					game.black = playerId;
@@ -86,15 +88,7 @@ class Handlers {
 				var persistence = this.persistence.getGameRecordPersistence();
 				var game:GameRecord = persistence.get(gameId);
 
-				var error:Error = null;
-				if (game == null) {
-					var message = StringTools.format(Handlers.ERROR_GAME_DNE, [gameId], "%s");
-					error = ClientError.notFound(message);
-				}
-
-				if (error != null) {
-					return Json.stringify(error);
-				}
+				this.checkGameExistsError(gameId, game);
 
 				var serializer = new ExternalGameRecordSerializer(persistence, null);
 				return serializer.encode(game);
@@ -111,22 +105,14 @@ class Handlers {
 				var persistence = this.persistence.getGameRecordPersistence();
 				var game:GameRecord = persistence.get(gameId);
 
-				var error:Error = null;
-				if (game == null) {
-					var message = StringTools.format(Handlers.ERROR_GAME_DNE, [gameId], "%s");
-					error = ClientError.notFound(message);
-				}
+				this.checkGameExistsError(gameId, game);
 
 				if (game.state != GameState.WAITING) {
-					error = ClientError.badRequest(Handlers.ERROR_GAME_IN_PROGRESS);
+					throw ClientError.badRequest(Handlers.ERROR_GAME_IN_PROGRESS);
 				}
 
 				if (game.black.length > 0 && game.white.length > 0) {
-					error = ServerError.general(Handlers.ERROR_GAME_INVALID);
-				}
-
-				if (error != null) {
-					return Json.stringify(error);
+					throw ServerError.general(Handlers.ERROR_GAME_INVALID);
 				}
 
 				var playerId = Uuid.v4();
@@ -153,22 +139,21 @@ class Handlers {
 				var persistence = this.persistence.getGameRecordPersistence();
 				var game:GameRecord = persistence.get(gameId);
 
-				var content = request.getData();
-				var params:MoveParams = cast Json.parse(content);
+				var params:MoveParams = cast parseParams(request, ['move', 'player']);
 				var playerId:UuidV4 = params.player;
 				var move:Move = {
 					from: Position.fromPoint(params.move.from),
 					to: Position.fromPoint(params.move.to)
 				};
 
-				var error:Error = this.getRunningGameError(game, playerId);
+				this.checkRunningGameError(gameId, game, playerId);
 
-				if (error == null && !game.board.isValidMove(move)) {
-					error = ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
+				if (!game.board.isValidMove(move)) {
+					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
 				}
 
-				if (error != null) {
-					return Json.stringify(error);
+				if (game.board.pieceAt(move.from) != game.currentPlayer) {
+					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
 				}
 
 				game.board.move(move);
@@ -200,14 +185,10 @@ class Handlers {
 				var persistence = this.persistence.getGameRecordPersistence();
 				var game:GameRecord = persistence.get(gameId);
 
-				var error:Error = this.getRunningGameError(game, playerId);
+				this.checkRunningGameError(gameId, game, playerId);
 
-				if (error == null && !game.canPass) {
-					error = ClientError.badRequest(Handlers.ERROR_GAME_NOT_PASSABLE);
-				}
-
-				if (error != null) {
-					return Json.stringify(error);
+				if (!game.canPass) {
+					throw ClientError.badRequest(Handlers.ERROR_GAME_NOT_PASSABLE);
 				}
 
 				game.next();
@@ -219,21 +200,65 @@ class Handlers {
 		};
 	}
 
-	private function getRunningGameError(game:GameRecord, playerId:UuidV4): Error {
-		var error:Error = null;
-		if (error == null && game.state != GameState.PLAYING) {
-			error = ClientError.badRequest(
+	private function checkGameExistsError(gameId:UuidV4, game:GameRecord):Void {
+		if (game == null) {
+			var message = StringTools.format(Handlers.ERROR_GAME_DNE, [gameId], "%s");
+			throw ClientError.notFound(message);
+		}
+	}
+
+	private function checkRunningGameError(gameId:UuidV4, game:GameRecord, playerId:UuidV4):Void {
+		this.checkGameExistsError(gameId, game);
+
+		if (game.state != GameState.PLAYING) {
+			throw ClientError.badRequest(
 				game.state == GameState.DONE ? Handlers.ERROR_GAME_FINISHED : Handlers.ERROR_GAME_NOT_STARTED
 			);
 		}
 
 		// check if right player
-		if (error == null && game.currentPlayerId() != playerId) {
-			error = ClientError.badRequest(Handlers.ERROR_GAME_NOT_TURN);
-		} else if (error == null && (game.black != playerId && game.white != playerId)) {
-			error = ClientError.badRequest(Handlers.ERROR_GAME_INVALID_PLAYER);
+		if (game.currentPlayerId() != playerId) {
+			throw ClientError.badRequest(Handlers.ERROR_GAME_NOT_TURN);
+		} else if (game.black != playerId && game.white != playerId) {
+			throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_PLAYER);
+		}
+	}
+
+	private function parseParams<T>(request:Request, fields:Array<String>):T {
+		var content = request.getData();
+		if (content == null || content == "") {
+			throw ClientError.badRequest(Handlers.ERROR_INVALID_PARAMETERS);
+		}
+		var params = cast Json.parse(content);
+		for (field in fields) {
+			if (!Reflect.hasField(params, field)) {
+				throw ClientError.badRequest(Handlers.ERROR_INVALID_PARAMETERS);
+			}
 		}
 
-		return error;
+		return params;
+	}
+
+	private function validatePiece(val:Int):Void {
+		if (val < 0 || val > 2) {
+			var message = StringTools.format(Handlers.ERROR_GAME_INVALID_PIECE, ['' + val], "%s");
+			throw ClientError.badRequest(message);
+		}
+	}
+
+	private function wrap(requestHandler:RequestHandler):RequestHandler {
+		var handler = requestHandler.handler;
+		requestHandler.handler = function(request:Request) {
+			var response = null;
+			try {
+				response = handler(request);
+			} catch(error:Error) {
+				return Json.stringify(error);
+			}
+
+			return response;
+		};
+
+		return requestHandler;
 	}
 }

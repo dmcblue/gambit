@@ -1,5 +1,6 @@
 package dmcblue.gambit.server;
 
+import dmcblue.gambit.server.GameRecordObject;
 import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.GameRecord;
 import interealmGames.persistence.JsonFilePersistence;
@@ -21,9 +22,8 @@ class GameRecordPersistence implements ObjectPersistence<String, GameRecord> {
 	}
 
 	public function get(id:String):Null<GameRecord> {
-		return GameRecord.fromObject(
-			this.gameRecordObjectPersistence.get(id)
-		);
+		var gro:Null<GameRecordObject> = this.gameRecordObjectPersistence.get(id);
+		return gro == null ? null : GameRecord.fromObject(gro);
 	}
 
 	public function getAll():Array<GameRecord> {
