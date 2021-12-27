@@ -54,6 +54,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(200, request.getStatus());
 		Assert.equals("1234", Reflect.field(response, 'id'));
 		Assert.equals(Piece.WHITE, Reflect.field(response, 'currentPlayer'));
 		Assert.equals(false, Reflect.field(response, 'canPass'));
@@ -85,6 +86,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, request.getStatus());
 		Assert.equals(404, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -121,6 +123,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -157,6 +160,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -194,6 +198,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -230,6 +235,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -266,6 +272,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -291,6 +298,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, request.getStatus());
 		Assert.equals(404, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -316,6 +324,7 @@ class HandlersMoveTest extends Test
 			data: Json.stringify(params)
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, request.getStatus());
 		Assert.equals(404, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}

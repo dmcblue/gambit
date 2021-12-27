@@ -45,6 +45,7 @@ class HandlersGetTest extends Test
 			type: RequestType.GET
 		});
 		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(200, request.getStatus());
 		Assert.equals("1234", Reflect.field(response, 'id'));
 		Assert.equals(Piece.BLACK, Reflect.field(response, 'currentPlayer'));
 		Assert.equals(true, Reflect.field(response, 'canPass'));
@@ -59,6 +60,7 @@ class HandlersGetTest extends Test
 			type: RequestType.GET
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, request.getStatus());
 		Assert.equals(404, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}

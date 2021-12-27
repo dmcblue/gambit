@@ -74,6 +74,8 @@ class Handlers {
 				var persistence = this.persistence.getGameRecordPersistence();
 				persistence.save(game);
 				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
+
+				request.setStatus(201);
 				return serializer.encode(game);
 			}
 		};
@@ -253,7 +255,12 @@ class Handlers {
 			try {
 				response = handler(request);
 			} catch(error:Error) {
+				request.setStatus(error.status);
 				return Json.stringify(error);
+			}
+
+			if (request.getStatus() == null) {
+				request.setStatus(200);
 			}
 
 			return response;

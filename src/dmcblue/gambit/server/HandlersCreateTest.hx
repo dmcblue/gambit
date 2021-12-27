@@ -32,6 +32,7 @@ class HandlersCreateTest extends Test
 			})
 		});
 		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(201, request.getStatus());
 		Assert.isTrue(Reflect.hasField(response, 'id'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'id')));
 		Assert.equals(Piece.BLACK, Reflect.field(response, 'currentPlayer'));
@@ -56,11 +57,12 @@ class HandlersCreateTest extends Test
 		});
 
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testBadParams1() {
+	public function testBadParams() {
 		var request:Request = new Request({
 			url: "/create",
 			type: RequestType.POST,
@@ -70,6 +72,7 @@ class HandlersCreateTest extends Test
 		});
 
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -84,6 +87,7 @@ class HandlersCreateTest extends Test
 		});
 
 		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(201, request.getStatus());
 		Assert.isTrue(Reflect.hasField(response, 'id'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'id')));
 	}

@@ -40,6 +40,7 @@ class HandlersJoinTest extends Test
 			type: RequestType.GET
 		});
 		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(200, request.getStatus());
 		Assert.equals("1234", Reflect.field(response, 'id'));
 		Assert.equals(Piece.BLACK, Reflect.field(response, 'currentPlayer'));
 		Assert.equals(false, Reflect.field(response, 'canPass'));
@@ -56,6 +57,7 @@ class HandlersJoinTest extends Test
 			type: RequestType.GET
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(404, request.getStatus());
 		Assert.equals(404, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -77,6 +79,7 @@ class HandlersJoinTest extends Test
 			type: RequestType.GET
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
@@ -98,6 +101,7 @@ class HandlersJoinTest extends Test
 			type: RequestType.GET
 		});
 		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}

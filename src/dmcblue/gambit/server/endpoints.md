@@ -2,6 +2,9 @@
 
 All requests should include an ID (UUID) for each player, they don't know each others.
 
+## GET /status
+Response
+200
 
 ## POST /create
 Request
