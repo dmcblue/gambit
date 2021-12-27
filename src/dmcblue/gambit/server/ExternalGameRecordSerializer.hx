@@ -31,9 +31,12 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 			board: gameRecord.board.toString(),
 			currentPlayer: gameRecord.currentPlayer,
 			canPass: gameRecord.canPass,
-			state: gameRecord.state,
-			player: this.currentPlayer
+			state: gameRecord.state
 		};
+
+		if (this.currentPlayer != null) {
+			obj.player = this.currentPlayer;
+		}
 		return this.objectSerializer.encode(obj);
 	}
 }

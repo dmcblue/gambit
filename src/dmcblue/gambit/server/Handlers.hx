@@ -45,6 +45,7 @@ class Handlers {
 		var handlers:Array<RequestHandler> = [];
 
 		handlers.push(this.create());
+		handlers.push(this.get());
 		handlers.push(this.join());
 		handlers.push(this.move());
 		handlers.push(this.pass());
@@ -71,6 +72,31 @@ class Handlers {
 				var persistence = this.persistence.getGameRecordPersistence();
 				persistence.save(game);
 				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
+				return serializer.encode(game);
+			}
+		};
+	}
+
+	public function get():RequestHandler {
+		return {
+			type: RequestType.GET,
+			path: "/game/{id}[/]",
+			handler: function(request:Request) {
+				var gameId = request.getPathArgument('id');
+				var persistence = this.persistence.getGameRecordPersistence();
+				var game:GameRecord = persistence.get(gameId);
+
+				var error:Error = null;
+				if (game == null) {
+					var message = StringTools.format(Handlers.ERROR_GAME_DNE, [gameId], "%s");
+					error = ClientError.notFound(message);
+				}
+
+				if (error != null) {
+					return Json.stringify(error);
+				}
+
+				var serializer = new ExternalGameRecordSerializer(persistence, null);
 				return serializer.encode(game);
 			}
 		};
