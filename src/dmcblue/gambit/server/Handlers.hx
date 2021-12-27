@@ -37,6 +37,7 @@ class Handlers {
 	static public var ERROR_GAME_NOT_PASSABLE = "Cannot pass this turn.";
 	static public var ERROR_GAME_NOT_STARTED = "This game has not started yet.";
 	static public var ERROR_GAME_NOT_TURN = "Not this players turn.";
+	static public var MESSAGE_STATUS_ONLINE = "Service online";
 
 	private var persistence:Persistence;
 	public function new(persistence:Persistence) {
@@ -51,6 +52,7 @@ class Handlers {
 		handlers.push(this.wrap(this.join()));
 		handlers.push(this.wrap(this.move()));
 		handlers.push(this.wrap(this.pass()));
+		handlers.push(this.wrap(this.status()));
 		
 		return handlers;
 	}
@@ -198,6 +200,19 @@ class Handlers {
 				persistence.save(game);
 				var serializer = new ExternalGameRecordSerializer(persistence, game.currentPlayerId());
 				return serializer.encode(game);
+			}
+		};
+	}
+
+	public function status():RequestHandler {
+		return {
+			type: RequestType.GET,
+			path: "/status[/]",
+			handler: function(request:Request) {
+				return Json.stringify({
+					status: 200,
+					message: Handlers.MESSAGE_STATUS_ONLINE
+				});
 			}
 		};
 	}
