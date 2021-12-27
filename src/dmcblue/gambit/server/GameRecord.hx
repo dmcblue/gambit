@@ -65,6 +65,11 @@ class GameRecord {
 		return this.currentPlayer == Piece.BLACK ? this.black : this.white;
 	}
 
+	public function next():Void {
+		this.canPass = false;
+		this.currentPlayer = this.currentPlayer == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
+	}
+
 	public function toObject():GameRecordObject {
 		return {
 			id: this.id,

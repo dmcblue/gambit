@@ -8,6 +8,7 @@ import dmcblue.gambit.server.Persistence;
 import dmcblue.gambit.server.HandlersCreateTest;
 import dmcblue.gambit.server.HandlersJoinTest;
 import dmcblue.gambit.server.HandlersMoveTest;
+import dmcblue.gambit.server.HandlersPassTest;
 import dmcblue.gambit.server.Handlers;
 import interealmGames.server.http.test.Server;
 import interealmGames.persistence.FileSystemConnection;
@@ -31,6 +32,7 @@ class Test {
 		runner.addCase(new HandlersCreateTest());
 		runner.addCase(new HandlersJoinTest());
 		runner.addCase(new HandlersMoveTest());
+		runner.addCase(new HandlersPassTest());
 		Report.create(runner);
 		runner.run();
 	}

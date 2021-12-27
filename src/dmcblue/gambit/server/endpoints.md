@@ -34,7 +34,7 @@ Response
 OR
 - Error
 
-## GET /pass
+## POST /game/{gameid}/pass
 Request
 - Game UUID
 - User UUID

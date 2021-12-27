@@ -32,6 +32,7 @@ class Handlers {
 	static public var ERROR_GAME_INVALID = "The game data is bad, please create a new game.";
 	static public var ERROR_GAME_INVALID_MOVE = "Move is invalid.";
 	static public var ERROR_GAME_INVALID_PLAYER = "Player is invalid.";
+	static public var ERROR_GAME_NOT_PASSABLE = "Cannot pass this turn.";
 	static public var ERROR_GAME_NOT_STARTED = "This game has not started yet.";
 	static public var ERROR_GAME_NOT_TURN = "Not this players turn.";
 
@@ -43,14 +44,15 @@ class Handlers {
 	public function getHandlers():Array<RequestHandler> {
 		var handlers:Array<RequestHandler> = [];
 
-		handlers.push(this.createGame());
-		handlers.push(this.joinGame());
+		handlers.push(this.create());
+		handlers.push(this.join());
 		handlers.push(this.move());
+		handlers.push(this.pass());
 		
 		return handlers;
 	}
 
-	public function createGame():RequestHandler {
+	public function create():RequestHandler {
 		return {
 			type: RequestType.POST,
 			path: "/create[/]",
@@ -74,7 +76,7 @@ class Handlers {
 		};
 	}
 
-	public function joinGame():RequestHandler {
+	public function join():RequestHandler {
 		return {
 			type: RequestType.GET,
 			path: "/game/{id}/join[/]",
@@ -133,19 +135,7 @@ class Handlers {
 					to: Position.fromPoint(params.move.to)
 				};
 
-				var error:Error = null;
-				if (error == null && game.state != GameState.PLAYING) {
-					error = ClientError.badRequest(
-						game.state == GameState.DONE ? Handlers.ERROR_GAME_FINISHED : Handlers.ERROR_GAME_NOT_STARTED
-					);
-				}
-
-				// check if right player
-				if (error == null && game.currentPlayerId() != playerId) {
-					error = ClientError.badRequest(Handlers.ERROR_GAME_NOT_TURN);
-				} else if (error == null && (game.black != playerId && game.white != playerId)) {
-					error = ClientError.badRequest(Handlers.ERROR_GAME_INVALID_PLAYER);
-				}
+				var error:Error = this.getRunningGameError(game, playerId);
 
 				if (error == null && !game.board.isValidMove(move)) {
 					error = ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
@@ -159,10 +149,11 @@ class Handlers {
 				if (game.board.isOver()) {
 					game.state = GameState.DONE;
 				} else {
+					// make sure the other player has moves
 					if (game.board.getMoves(move.to).length > 0) {
 						game.canPass = true;
 					} else {
-						game.currentPlayer = game.currentPlayer == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
+						game.next();
 					}
 				}
 
@@ -171,5 +162,52 @@ class Handlers {
 				return serializer.encode(game);
 			}
 		};
+	}
+
+	public function pass():RequestHandler {
+		return {
+			type: RequestType.GET,
+			path: "/game/{id}/pass/{playerId}[/]",
+			handler: function(request:Request) {
+				var gameId = request.getPathArgument('id');
+				var playerId = request.getPathArgument('playerId');
+				var persistence = this.persistence.getGameRecordPersistence();
+				var game:GameRecord = persistence.get(gameId);
+
+				var error:Error = this.getRunningGameError(game, playerId);
+
+				if (error == null && !game.canPass) {
+					error = ClientError.badRequest(Handlers.ERROR_GAME_NOT_PASSABLE);
+				}
+
+				if (error != null) {
+					return Json.stringify(error);
+				}
+
+				game.next();
+
+				persistence.save(game);
+				var serializer = new ExternalGameRecordSerializer(persistence, game.currentPlayerId());
+				return serializer.encode(game);
+			}
+		};
+	}
+
+	private function getRunningGameError(game:GameRecord, playerId:UuidV4): Error {
+		var error:Error = null;
+		if (error == null && game.state != GameState.PLAYING) {
+			error = ClientError.badRequest(
+				game.state == GameState.DONE ? Handlers.ERROR_GAME_FINISHED : Handlers.ERROR_GAME_NOT_STARTED
+			);
+		}
+
+		// check if right player
+		if (error == null && game.currentPlayerId() != playerId) {
+			error = ClientError.badRequest(Handlers.ERROR_GAME_NOT_TURN);
+		} else if (error == null && (game.black != playerId && game.white != playerId)) {
+			error = ClientError.badRequest(Handlers.ERROR_GAME_INVALID_PLAYER);
+		}
+
+		return error;
 	}
 }
