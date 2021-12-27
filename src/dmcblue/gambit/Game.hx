@@ -58,7 +58,7 @@ class Game implements GameMaster {
 				return null;
 			}
 
-			var error = this.isValidMove(move);
+			var error = this.board.isValidMove(move);
 			if (error == null) {
 				isValidMove = true;
 			} else {
@@ -104,7 +104,7 @@ class Game implements GameMaster {
 				return null;
 			}
 
-			var error = this.isValidMove(move);
+			var error = this.board.isValidMove(move);
 			if (error == null) {
 				isValidMove = true;
 			} else {
@@ -113,23 +113,6 @@ class Game implements GameMaster {
 		}
 
 		return move;
-	}
-
-	/**
-		Determines if a move is valid
-		@TODO Should this be in the Board class?
-	**/
-	public function isValidMove(move:Move):Null<Error> {
-		var start = this.board.pieceAt(move.from);
-		if (start != this.currentPlayer) {
-			return new WrongTeamError(start);
-		}
-		var end = this.board.pieceAt(move.to);
-		if (end != Piece.NONE) {
-			return new OccupiedSpaceError(move.to, end);
-		}
-
-		return null;
 	}
 
 	/**

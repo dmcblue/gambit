@@ -16,7 +16,7 @@ import utest.Assert;
 import utest.Async;
 import utest.Test;
 
-class HandlersTest extends Test 
+class HandlersCreateTest extends Test 
 {
 	public function testCreate() {
 		var request:Request = new Request({
@@ -42,32 +42,5 @@ class HandlersTest extends Test
 		Assert.equals(response.canPass, game.canPass);
 		Assert.equals(response.board, game.board.toString());
 		Assert.equals(response.state, game.state);
-	}
-
-	public function testJoin() {
-		var otherPlayerId = Uuid.v4();
-		var game: GameRecord = new GameRecord(
-			"1234",
-			Piece.BLACK,
-			Board.newGame(),
-			false,
-			otherPlayerId,
-			"",
-			GameState.WAITING
-		);
-		Test.persistence.getGameRecordPersistence().save(game);
-		var request:Request = new Request({
-			url: "/game/1234/join",
-			type: RequestType.GET
-		});
-		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals("1234", Reflect.field(response, 'id'));
-		Assert.equals(Piece.BLACK, Reflect.field(response, 'currentPlayer'));
-		Assert.equals(false, Reflect.field(response, 'canPass'));
-		Assert.equals("00000000111111112222222200000000", Reflect.field(response, 'board'));
-		Assert.equals(GameState.PLAYING, Reflect.field(response, 'state'));
-		Assert.isTrue(Reflect.hasField(response, 'player'));
-		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
-		Assert.notEquals(otherPlayerId, Reflect.field(response, 'player'));
 	}
 }

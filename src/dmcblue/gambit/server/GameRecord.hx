@@ -1,6 +1,7 @@
 package dmcblue.gambit.server;
 
 import interealmGames.common.uuid.UuidV4;
+import interealmGames.common.uuid.UuidV4;
 import dmcblue.gambit.server.GameRecordObject;
 import dmcblue.gambit.Board;
 import dmcblue.gambit.Piece;
@@ -58,6 +59,10 @@ class GameRecord {
 		this.black = black;
 		this.white = white;
 		this.state = state;
+	}
+
+	public function currentPlayerId():UuidV4 {
+		return this.currentPlayer == Piece.BLACK ? this.black : this.white;
 	}
 
 	public function toObject():GameRecordObject {

@@ -1,11 +1,11 @@
 package dmcblue.gambit;
 
-typedef Point = {
-	var x: Int;
-	var y: Int;
-}
+import dmcblue.gambit.Point;
 
 abstract Position(Point) {
+	static public function fromPoint(point:Point):Position {
+		return new Position(point.x, point.y);
+	}
 	public var x(get,set):Int;
 	public var y(get,set):Int;
 

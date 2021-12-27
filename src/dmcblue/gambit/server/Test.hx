@@ -5,7 +5,9 @@ import utest.Runner;
 import utest.ui.Report;
 import dmcblue.gambit.server.GameRecordPersistenceTest;
 import dmcblue.gambit.server.Persistence;
-import dmcblue.gambit.server.HandlersTest;
+import dmcblue.gambit.server.HandlersCreateTest;
+import dmcblue.gambit.server.HandlersJoinTest;
+import dmcblue.gambit.server.HandlersMoveTest;
 import dmcblue.gambit.server.Handlers;
 import interealmGames.server.http.test.Server;
 import interealmGames.persistence.FileSystemConnection;
@@ -26,7 +28,9 @@ class Test {
 		Test.server = new Server(handlers.getHandlers());
 		var runner:Runner = new Runner();
 		runner.addCase(new GameRecordPersistenceTest());
-		runner.addCase(new HandlersTest());
+		runner.addCase(new HandlersCreateTest());
+		runner.addCase(new HandlersJoinTest());
+		runner.addCase(new HandlersMoveTest());
 		Report.create(runner);
 		runner.run();
 	}

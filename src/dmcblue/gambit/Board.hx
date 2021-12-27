@@ -6,6 +6,7 @@ import dmcblue.gambit.PieceTools;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.errors.NotIslandError;
 import dmcblue.gambit.errors.OccupiedSpaceError;
+import interealmGames.common.errors.Error;
 
 using StringTools;
 
@@ -250,6 +251,26 @@ class Board {
 	**/
 	public function isOver() {
 		return !this.hasAnyMoreMoves(Piece.WHITE) && !this.hasAnyMoreMoves(Piece.BLACK);
+	}
+
+	/**
+		Determines if a move is valid
+		@TODO Should this be in the Board class?
+	**/
+	// public function isValidMove(move:Move):Null<Error> {
+	public function isValidMove(move:Move):Bool {
+		var start = this.pieceAt(move.from);
+		// if (start != this.currentPlayer) {
+		// 	return new WrongTeamError(start);
+		// }
+		var end = this.pieceAt(move.to);
+		if (end != Piece.NONE) {
+			//return new OccupiedSpaceError(move.to, end);
+			return false;
+		}
+
+		// return null;
+		return true;
 	}
 
 	/**
