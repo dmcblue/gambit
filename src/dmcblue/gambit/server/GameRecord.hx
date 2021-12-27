@@ -1,78 +1,74 @@
 package dmcblue.gambit.server;
 
-import dmcblue.gambit.server.GameRecord;
+import interealmGames.common.uuid.UuidV4;
+import dmcblue.gambit.server.GameRecordObject;
 import dmcblue.gambit.Board;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.server.errors.InvalidInputError;
-import interealmGames.common.Uuid;
+import interealmGames.common.uuid.Uuid;
 
 class GameRecord {
 	static public var REGEX_PIECES = ~/[^0-2]+/;
 
 	static public function create():GameRecord {
-		var board = Board.newGame();
-		var id = Uuid.v4();
-		var startingPlayer = Piece.BLACK;
-		return new GameRecord(id, startingPlayer, board);
+		return new GameRecord(
+			Uuid.v4(),
+			Piece.BLACK,
+			Board.newGame(),
+			false,
+			"",
+			"",
+			GameState.WAITING
+		);
 	}
 
-	static public function fromString(id:String, str:String):GameRecord {
-		if(GameRecord.REGEX_PIECES.match(str)) {
-			// invalid chars
-			throw new InvalidInputError(str);
-		}
-
-		if(str.length != 33) {
-			// invalid input
-			throw new InvalidInputError(str);
-		}
-
-		if(str.charAt(0) == '0') {
-			// invalid team
-			throw new InvalidInputError(str);
-		}
-
-		var currentPlayer:Piece = GameRecord.pieceFromString(str.charAt(0));
-		var board = Board.fromString(str.substring(1));
-
-		return new GameRecord(id, currentPlayer, board);
+	static public function fromObject(game:GameRecordObject):GameRecord {
+		return new GameRecord(
+			game.id,
+			game.currentPlayer,
+			Board.fromString(game.board),
+			game.canPass,
+			game.black,
+			game.white,
+			game.state
+		);
 	}
 
-	static public function pieceFromString(str:String):Piece {
-		return switch str {
-			case '0': Piece.NONE;
-			case '1': Piece.WHITE;
-			case '2': Piece.BLACK;
-			default: Piece.NONE;
-		}
-	}
-
-	static public function pieceToString(piece:Piece):String {
-		return switch piece {
-			case Piece.NONE: '0';
-			case Piece.WHITE: '1';
-			case Piece.BLACK: '2';
-			default: '0';
-		}
-	}
-
-	public var id:String; // UUID v4
+	public var id:UuidV4; // UUID v4
 	public var board:Board;
 	public var currentPlayer:Piece;
+	public var canPass:Bool = false;
+	public var black:UuidV4;
+	public var white:UuidV4;
+	public var state:GameState;
 
-	public function new(id:String, currentPlayer:Piece, board:Board) {
+	public function new(
+		id:String,
+		currentPlayer:Piece,
+		board:Board,
+		canPass:Bool,
+		black:UuidV4,
+		white:UuidV4,
+		state:GameState
+	) {
 		this.id = id;
 		this.currentPlayer = currentPlayer;
 		this.board = board;
+		this.canPass = canPass;
+		this.black = black;
+		this.white = white;
+		this.state = state;
 	}
 
-	public function toString():String {
-		var str:String = GameRecord.pieceToString(this.currentPlayer);
-		str += this.board.board.map(function(pieces:Array<Piece>) {
-			return pieces.map(function(piece:Piece) {
-				return GameRecord.pieceToString(piece);
-			}).join('');
-		}).join('');
-		return str;
+	public function toObject():GameRecordObject {
+		return {
+			id: this.id,
+			currentPlayer: this.currentPlayer,
+			board: this.board.toString(),
+			canPass: this.canPass,
+			black: this.black,
+			white: this.white,
+			state: this.state
+		};
 	}
 }

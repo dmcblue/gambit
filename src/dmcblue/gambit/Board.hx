@@ -320,7 +320,6 @@ class Board {
 			for(cell in rows) {
 				str += PieceTools.toString(cell);
 			}
-			str += "\n";
 		}
 		return str;
 	}

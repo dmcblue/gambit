@@ -2,8 +2,8 @@ package dmcblue.gambit.server;
 
 import interealmGames.persistence.FileSystemConnection;
 import interealmGames.persistence.ObjectPersistence;
+import interealmGames.persistence.JsonFilePersistence;
 import dmcblue.gambit.server.GameRecord;
-import dmcblue.gambit.server.GameRecordPersistence;
 
 class Persistence {
 	private var fileConnection:FileSystemConnection;
@@ -13,6 +13,6 @@ class Persistence {
 	}
 
 	public function getGameRecordPersistence():ObjectPersistence<String, GameRecord> {
-		return new GameRecordPersistence(this.fileConnection, '');
+		return new GameRecordPersistence(this.fileConnection);
 	}
 }
