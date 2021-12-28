@@ -1,23 +1,21 @@
 package dmcblue.gambit.server;
 
+import interealmGames.common.serializer.object.Json;
 import dmcblue.gambit.server.GameRecordObject;
 import dmcblue.gambit.server.GameRecord;
-import dmcblue.gambit.server.GameRecord;
-import interealmGames.persistence.JsonFilePersistence;
-import interealmGames.persistence.FileSystemConnection;
-import interealmGames.persistence.FileSystemConnection;
-import interealmGames.persistence.JsonFilePersistence;
+import interealmGames.persistence.NamespaceKeyValueConnection;
 import interealmGames.persistence.ObjectPersistence;
-import dmcblue.gambit.server.GameRecord;
+import interealmGames.persistence.SerializedPersistence;
 
 class GameRecordPersistence implements ObjectPersistence<String, GameRecord> {
 	private var gameRecordObjectPersistence:ObjectPersistence<String, GameRecordObject>;
-	public function new(fileConnection:FileSystemConnection) {
+	public function new(connection:NamespaceKeyValueConnection) {
 		this.gameRecordObjectPersistence =
-			new JsonFilePersistence(
-				fileConnection,
+			new SerializedPersistence<String, GameRecordObject>(
+				connection,
+				"id",
 				"games",
-				"id"
+				new Json<GameRecordObject>()
 			);
 	}
 

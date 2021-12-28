@@ -1,18 +1,18 @@
 package dmcblue.gambit.server;
 
-import interealmGames.persistence.FileSystemConnection;
+import interealmGames.persistence.NamespaceKeyValueConnection;
 import interealmGames.persistence.ObjectPersistence;
-import interealmGames.persistence.JsonFilePersistence;
 import dmcblue.gambit.server.GameRecord;
+import dmcblue.gambit.server.GameRecordPersistence;
 
 class Persistence {
-	private var fileConnection:FileSystemConnection;
+	private var connection:NamespaceKeyValueConnection;
 
-	public function new(fileConnection:FileSystemConnection) {
-		this.fileConnection = fileConnection;
+	public function new(connection:NamespaceKeyValueConnection) {
+		this.connection = connection;
 	}
 
 	public function getGameRecordPersistence():ObjectPersistence<String, GameRecord> {
-		return new GameRecordPersistence(this.fileConnection);
+		return new GameRecordPersistence(this.connection);
 	}
 }

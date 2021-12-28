@@ -1,11 +1,12 @@
 package dmcblue.gambit.server;
 
 import dmcblue.gambit.server.Handlers;
+import dmcblue.gambit.server.Handlers;
 import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.GameRecordPersistence;
 import dmcblue.gambit.server.Persistence;
 import interealmGames.server.http.RequestHandler;
-import interealmGames.persistence.StandardFileSystemConnection;
+import interealmGames.persistence.RedisConnection;
 import interealmGames.persistence.ObjectPersistence;
 
 class Main 
@@ -16,9 +17,16 @@ class Main
 	
 	static function main() 
 	{
-		var fileConnection = new StandardFileSystemConnection();
-		var persistence = new Persistence(fileConnection);
+		var connection = new RedisConnection("localhost", 6379, 7);
+		var persistence = new Persistence(connection);
 		var handlers = new Handlers(persistence);
 		handlers.getHandlers();
+	}
+
+	static function getHandlers():Array<RequestHandler> {
+		var connection = new RedisConnection("localhost", 6379, 7);
+		var persistence = new Persistence(connection);
+		var handlers = new Handlers(persistence);
+		return handlers.getHandlers();
 	}
 }

@@ -13,8 +13,7 @@ import dmcblue.gambit.server.HandlersPassTest;
 import dmcblue.gambit.server.HandlersStatusTest;
 import dmcblue.gambit.server.Handlers;
 import interealmGames.server.http.test.Server;
-import interealmGames.persistence.FileSystemConnection;
-import interealmGames.persistence.InMemoryFileSystemConnection;
+import interealmGames.persistence.MemoryConnection;
 
 /**
  * All tests for this package
@@ -22,11 +21,11 @@ import interealmGames.persistence.InMemoryFileSystemConnection;
 class Test {
 	static public var server:Server;
 	static public var persistence:Persistence;
-	static public var fileConnection:InMemoryFileSystemConnection;
+	static public var connection:MemoryConnection;
 
 	public static function main() {
-		Test.fileConnection = new InMemoryFileSystemConnection();
-		Test.persistence = new Persistence(Test.fileConnection);
+		Test.connection = new MemoryConnection();
+		Test.persistence = new Persistence(Test.connection);
 		var handlers = new Handlers(Test.persistence);
 		Test.server = new Server(handlers.getHandlers());
 		var runner:Runner = new Runner();
@@ -42,6 +41,6 @@ class Test {
 	}
 
 	public static function resetDatabase() {
-		Test.fileConnection.clear();
+		Test.connection.clearAll();
 	}
 }

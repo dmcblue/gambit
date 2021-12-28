@@ -18,7 +18,8 @@ class GameRecordPersistenceTest extends Test
 {
 	private var persistence:ObjectPersistence<String, GameRecord>;
 	public function setup() {
-		this.persistence = new GameRecordPersistence(Test.fileConnection);
+		Test.resetDatabase();
+		this.persistence = new GameRecordPersistence(Test.connection);
 	}
 
 	public function testGet() {
@@ -31,7 +32,7 @@ class GameRecordPersistenceTest extends Test
 			white: "9012",
 			state: GameState.DONE
 		};
-		Test.fileConnection.save('games/1234.json', Json.stringify(record));
+		Test.connection.save('games', '1234', Json.stringify(record));
 		var game = this.persistence.get("1234");
 		Assert.equals("1234", game.id);
 		Assert.equals("00000000111111112222222200000000", game.board.toString());
@@ -54,7 +55,7 @@ class GameRecordPersistenceTest extends Test
 			GameState.WAITING
 		);
 		this.persistence.save(game);
-		var file = Test.fileConnection.get('games/' + id + '.json');
+		var file = Test.connection.get('games', id);
 		var game = Json.parse(file);
 		Assert.isTrue(Reflect.hasField(game, 'id'));
 		Assert.equals(36, Reflect.field(game, 'id').length);
