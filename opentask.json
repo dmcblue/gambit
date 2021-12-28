@@ -16,6 +16,10 @@
 			"command": "copy",
 			"testArgument": "/?"
 		}
+	},{
+		"name": "sed",
+		"command": "sed",
+		"testArgument": "'s/ga/ga/g' <<< 'ga'"
 	}],
 		
 	"tasks": [{
@@ -180,7 +184,7 @@
 	
 	
 	{
-		"name": "build:haxe",
+		"name": "build:server:haxe",
 		"description": "Transpiles Haxe to PHP",
 		"groups": [{
 			"name": "build:server",
@@ -189,14 +193,36 @@
 		"command": "haxe",
 		"arguments": [
 			"-lib", "haxe-crypto",
-			"-lib", "dotenv",
+			"-lib", "hxneko-redis",
 			"-cp", "src",
 			"-cp", "common/src",
 			"-cp", "persistence/src",
 			"-cp", "server/src",
-			"-D", "php-prefix=EB",
+			"-D", "php-prefix=Gambit",
 			"-php", "bin",
 			"-main", "dmcblue.gambit.server.Main"
 		]
+	}, {
+		"name": "build:server:index",
+		"description": "Updates build files for server-php",
+		"groups": [{
+			"name": "build:server",
+			"rank": 2
+		}],
+		"command": "sed",
+		"arguments": [
+			"-i",
+			"\".bak\"",
+			"s+Main::main+return Main::getHandlers+g",
+			"bin/index.php"
+		],
+		"macos": {
+			"arguments": [
+				"-i",
+				"''",
+				"\"s+Main::main+return\\ Main::getHandlers+g\"",
+				"bin/index.php"
+			]
+		}
 	}]
 }

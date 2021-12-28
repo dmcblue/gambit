@@ -7,3 +7,6 @@
 [submodule "persistence"]
 	path = persistence
 	url = git@github.com:interealm-games/persistence
+[submodule "browser"]
+	path = browser
+	url = git@github.com:interealm-games/browser
