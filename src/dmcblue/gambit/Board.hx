@@ -269,6 +269,21 @@ class Board {
 			return false;
 		}
 
+		var distX = Math.abs(move.from.x - move.to.x);
+		var distY = Math.abs(move.from.y - move.to.y);
+		if (Std.int(Math.max(distX, distY)) != 2) {
+			return false;
+		}
+
+		if (distX == 1 || distY == 1) {
+			return false;
+		}
+
+		var midPoint = this.midPoint(move.from, move.to);
+		if (this.pieceAt(midPoint) != (start == Piece.BLACK ? Piece.WHITE : Piece.BLACK)) {
+			return false;
+		}
+
 		// return null;
 		return true;
 	}

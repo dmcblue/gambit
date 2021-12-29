@@ -1,5 +1,7 @@
 package dmcblue.gambit;
 
+import haxe.Json;
+import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.Board;
@@ -30,6 +32,11 @@ typedef CalculateScoreTest = {
 	var board: String;
 	var team: Piece;
 	var expected: Int;
+};
+
+typedef IsValidMoveTest = {
+	var move:Move;
+	var expected:Bool;
 };
 
 class BoardTest extends Test 
@@ -224,6 +231,39 @@ class BoardTest extends Test
 		for(test in tests) {
 			var board = Board.fromString(test.board);
 			Assert.equals(board.isOver(), test.expected, test.board);
+		}
+	}
+
+	public function testIsValidMove() {
+		var board = Board.newGame();
+		var tests:Array<IsValidMoveTest> = [{
+			move: {
+				from: new Position(2, 2),
+				to: new Position(2, 0)
+			},
+			expected: true
+		}, {
+			move: {
+				from: new Position(2, 2),
+				to: new Position(2, 3)
+			},
+			expected: false
+		}, {
+			move: {
+				from: new Position(2, 2),
+				to: new Position(1, 0)
+			},
+			expected: false
+		}, {
+			move: {
+				from: new Position(2, 2),
+				to: new Position(0, 0)
+			},
+			expected: true
+		}];
+
+		for(test in tests) {
+			Assert.equals(test.expected, board.isValidMove(test.move), Json.stringify(test.move));
 		}
 	}
 	

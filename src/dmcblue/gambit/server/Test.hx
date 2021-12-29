@@ -1,8 +1,18 @@
 package dmcblue.gambit.server;
 
+import dmcblue.gambit.server.Api;
+import dmcblue.gambit.server.Api;
+import interealmGames.browser.api.TestApi;
+import interealmGames.server.http.test.Server;
 import interealmGames.server.http.test.Server;
 import utest.Runner;
 import utest.ui.Report;
+import dmcblue.gambit.server.ApiCreateTest;
+import dmcblue.gambit.server.ApiGetTest;
+import dmcblue.gambit.server.ApiJoinTest;
+import dmcblue.gambit.server.ApiMoveTest;
+import dmcblue.gambit.server.ApiPassTest;
+import dmcblue.gambit.server.ApiStatusTest;
 import dmcblue.gambit.server.GameRecordPersistenceTest;
 import dmcblue.gambit.server.Persistence;
 import dmcblue.gambit.server.HandlersCreateTest;
@@ -19,6 +29,7 @@ import interealmGames.persistence.MemoryConnection;
  * All tests for this package
  */
 class Test {
+	static public var api:Api;
 	static public var server:Server;
 	static public var persistence:Persistence;
 	static public var connection:MemoryConnection;
@@ -28,7 +39,15 @@ class Test {
 		Test.persistence = new Persistence(Test.connection);
 		var handlers = new Handlers(Test.persistence);
 		Test.server = new Server(handlers.getHandlers());
+		var api = new TestApi('https://www.gambit.com/api', Test.server);
+		Test.api = new Api(api, 'https://www.gambit.com/api');
 		var runner:Runner = new Runner();
+		runner.addCase(new ApiCreateTest());
+		runner.addCase(new ApiGetTest());
+		runner.addCase(new ApiJoinTest());
+		runner.addCase(new ApiMoveTest());
+		runner.addCase(new ApiPassTest());
+		runner.addCase(new ApiStatusTest());
 		runner.addCase(new GameRecordPersistenceTest());
 		runner.addCase(new HandlersCreateTest());
 		runner.addCase(new HandlersGetTest());

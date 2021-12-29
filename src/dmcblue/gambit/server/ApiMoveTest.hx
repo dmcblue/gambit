@@ -16,13 +16,13 @@ import utest.Assert;
 import utest.Async;
 import utest.Test;
 
-class HandlersMoveTest extends Test 
+class ApiMoveTest extends Test 
 {
 	public function setup() {
 		Test.resetDatabase();
 	}
 
-	public function testMove() {
+	public function testMove(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -48,24 +48,22 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(error);
+			Assert.equals("1234", Reflect.field(game, 'id'));
+			Assert.equals(Piece.WHITE, Reflect.field(game, 'currentPlayer'));
+			Assert.equals(false, Reflect.field(game, 'canPass'));
+			Assert.equals("00200000110111112202222200000000", Reflect.field(game, 'board'));
+			Assert.equals(GameState.PLAYING, Reflect.field(game, 'state'));
+			Assert.isTrue(Reflect.hasField(game, 'player'));
+			Assert.isTrue(Uuid.isV4(Reflect.field(game, 'player')));
+			Assert.equals(otherPlayerId, Reflect.field(game, 'player'));
+			async.done();
 		});
-		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(200, request.getStatus());
-		Assert.equals("1234", Reflect.field(response, 'id'));
-		Assert.equals(Piece.WHITE, Reflect.field(response, 'currentPlayer'));
-		Assert.equals(false, Reflect.field(response, 'canPass'));
-		Assert.equals("00200000110111112202222200000000", Reflect.field(response, 'board'));
-		Assert.equals(GameState.PLAYING, Reflect.field(response, 'state'));
-		Assert.isTrue(Reflect.hasField(response, 'player'));
-		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
-		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
 	}
 
-	public function testNotFound() {
+	public function testNotFound(async:Async) {
 		var playerId = Uuid.v4();
 		var params:MoveParams = {
 			move: {
@@ -80,18 +78,16 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(404, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(404, request.getStatus());
-		Assert.equals(404, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testGameUnstarted() {
+	public function testGameUnstarted(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -117,18 +113,16 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testGameFinished() {
+	public function testGameFinished(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -154,18 +148,16 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+		
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testBadPlayer() {
+	public function testBadPlayer(async:Async) {
 		var randomId = Uuid.v4();
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
@@ -192,18 +184,16 @@ class HandlersMoveTest extends Test
 			},
 			player: randomId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+		
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testWrongPlayer() {
+	public function testWrongPlayer(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -229,18 +219,16 @@ class HandlersMoveTest extends Test
 			},
 			player: otherPlayerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+		
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testWrongPiece() {
+	public function testWrongPiece(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -266,18 +254,16 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+		
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testOccupiedSpace() {
+	public function testOccupiedSpace(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -303,18 +289,16 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+		
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
 	}
 
-	public function testNoJump() {
+	public function testNoJump(async:Async) {
 		var playerId = Uuid.v4();
 		var otherPlayerId = Uuid.v4();
 		var game: GameRecord = new GameRecord(
@@ -340,15 +324,12 @@ class HandlersMoveTest extends Test
 			},
 			player: playerId
 		};
-		var request:Request = new Request({
-			url: "/game/1234/move",
-			type: RequestType.POST,
-			data: Json.stringify(params)
+		
+		Test.api.move("1234", params, function(game:ExternalGameRecordObject, error:ErrorObject) {
+			Assert.isNull(game);
+			Assert.equals(400, Reflect.field(error, 'status'));
+			Assert.isTrue(Reflect.hasField(error, 'message'));
+			async.done();
 		});
-		var response:ErrorObject = cast Json.parse(Test.server.handle(request));
-		Assert.equals(400, request.getStatus());
-		Assert.equals(400, Reflect.field(response, 'status'));
-		Assert.isTrue(Reflect.hasField(response, 'message'));
-		trace(response.message);
 	}
 }
