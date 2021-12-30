@@ -41,6 +41,8 @@ class HandlersCreateTest extends Test
 		Assert.equals(GameState.WAITING, Reflect.field(response, 'state'));
 		Assert.isTrue(Reflect.hasField(response, 'player'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
+		Assert.isTrue(Reflect.hasField(response, 'team'));
+		Assert.equals(Piece.WHITE, Reflect.field(response, 'team'));
 
 		var game:GameRecord = Test.persistence.getGameRecordPersistence().get(Reflect.field(response, 'id'));
 		Assert.equals(response.id, game.id);

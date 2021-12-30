@@ -154,6 +154,23 @@
 	},
 
 	{
+		"name": "run:main",
+		"description": "Runs",
+		"groups": [{
+			"name": "run",
+			"rank": 0
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-cp", "src",
+			"-cp", "browser/src",
+			"-cp", "common/src",
+			"--interp",
+			"--main", "dmcblue.gambit.Main"
+		]
+	},
+
+	{
 		"name": "build:cpp",
 		"description": "Transpiles Haxe to C++",
 		"groups": [{

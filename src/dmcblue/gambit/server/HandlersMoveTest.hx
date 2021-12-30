@@ -63,6 +63,8 @@ class HandlersMoveTest extends Test
 		Assert.isTrue(Reflect.hasField(response, 'player'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
 		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
+		Assert.isTrue(Reflect.hasField(response, 'team'));
+		Assert.equals(Piece.BLACK, Reflect.field(response, 'team'));
 	}
 
 	public function testNotFound() {
@@ -349,6 +351,5 @@ class HandlersMoveTest extends Test
 		Assert.equals(400, request.getStatus());
 		Assert.equals(400, Reflect.field(response, 'status'));
 		Assert.isTrue(Reflect.hasField(response, 'message'));
-		trace(response.message);
 	}
 }

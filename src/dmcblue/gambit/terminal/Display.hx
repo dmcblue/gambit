@@ -1,6 +1,7 @@
 package dmcblue.gambit.terminal;
 
 import dmcblue.gambit.Piece;
+import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.PieceTools;
 import dmcblue.gambit.Display in DisplayInterface;
@@ -120,6 +121,15 @@ class Display implements DisplayInterface {
 	}
 
 	/**
+		Display the invite
+	**/
+	public function invite(gameId:String):Void {
+		Sys.println(
+			'Join code: "${gameId}"'
+		);
+	}
+
+	/**
 		Creates a display version of Piece
 	**/
 	public function pieceToString(piece:Piece):String {
@@ -131,10 +141,8 @@ class Display implements DisplayInterface {
 		};
 	}
 
-
-	/**
-		@implements DisplayInterface
-	**/
+	// no longer part of interface so will not be called externally
+	// must self call 
 	public function playAgain():Bool {
 		Sys.println('Would you like to play again:');
 		var options = ['Yes', 'No'];
@@ -157,9 +165,7 @@ class Display implements DisplayInterface {
 	/**
 		@implements DisplayInterface
 	**/
-	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Move {
-		Sys.println('');
-		Sys.println(this.boardToString(game.getBoard()));
+	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Null<Move> {
 		var teamStr = this.pieceToString(currentPlayer);
 		var positionStr = this.positionToString(position);
 		Sys.println('$currentPlayer ($teamStr) has a follow-up move for Position "$positionStr":');
@@ -187,8 +193,6 @@ class Display implements DisplayInterface {
 		@implements DisplayInterface
 	**/
 	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Null<Move> {
-		Sys.println('');
-		Sys.println(this.boardToString(game.getBoard()));
 		var teamStr = this.pieceToString(currentPlayer);
 		Sys.println('Please select the next $currentPlayer ($teamStr) move:');
 		Sys.println('The following pieces are available to move:');
@@ -239,6 +243,17 @@ class Display implements DisplayInterface {
 			'\n\t4 pieces: 7 points',
 			'\n\t5 pieces: 9 points\n'].join(' ')
 		);
+	}
+
+	/**
+		Display the current game state
+	**/
+	public function showBoard(currentPlayer:Piece, board:Array<Array<Piece>>):Void {
+		Sys.println('');
+		Sys.println('Current Player: ${this.pieceToString(currentPlayer)}');
+		Sys.println('');
+		Sys.println(this.boardToString(board));
+		Sys.println('');
 	}
 
 	// public function positionFromString(str:String):Null<Position> {

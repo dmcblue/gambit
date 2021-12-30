@@ -19,9 +19,9 @@ interface Display {
 	public function endGame(scores:Map<Piece,Int>, game:GameMaster):Void;
 
 	/**
-		Ask user if they would like to play another game
+		Display the invite
 	**/
-	public function playAgain():Bool;
+	public function invite(gameId:String):Void;
 
 	/**
 		Gets the move continuing a multistage jump
@@ -31,5 +31,10 @@ interface Display {
 	/**
 		Asks user for their move for a round
 	**/
-	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Move;
+	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Null<Move>;
+
+	/**
+		Display the current game state
+	**/
+	public function showBoard(currentPlayer:Piece, board:Array<Array<Piece>>):Void;
 }

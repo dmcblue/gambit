@@ -1,5 +1,6 @@
 package dmcblue.gambit.server;
 
+import dmcblue.gambit.Piece;
 import interealmGames.common.uuid.UuidV4;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import dmcblue.gambit.server.ExternalGameRecordObject;
@@ -36,7 +37,13 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 
 		if (this.currentPlayer != null) {
 			obj.player = this.currentPlayer;
+trace(haxe.Json.stringify(gameRecord));
+trace(this.currentPlayer);
+			if (gameRecord.black != "" || gameRecord.white != "") {
+				obj.team = gameRecord.black == this.currentPlayer ? Piece.BLACK : Piece.WHITE;
+			}
 		}
+
 		return this.objectSerializer.encode(obj);
 	}
 }

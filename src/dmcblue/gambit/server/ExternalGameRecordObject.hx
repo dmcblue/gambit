@@ -11,4 +11,5 @@ typedef ExternalGameRecordObject =  {
 	var canPass:Bool;
 	var state:GameState;
 	var ?player:UuidV4;
+	var ?team:Piece;
 };

@@ -54,6 +54,8 @@ class HandlersPassTest extends Test
 		Assert.isTrue(Reflect.hasField(response, 'player'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
 		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
+		Assert.isTrue(Reflect.hasField(response, 'team'));
+		Assert.equals(Piece.BLACK, Reflect.field(response, 'team'));
 	}
 
 	public function testNotFound() {

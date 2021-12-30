@@ -77,9 +77,9 @@ class Api {
 		this.api.get(request);
 	}
 
-	public function move(id:UuidV4, params:MoveParams, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {
+	public function move(gameId:UuidV4, params:MoveParams, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {
 		var request:PostRequest = {
-			url: this.url + '/game/${id}/move',
+			url: this.url + '/game/${gameId}/move',
 			data: Json.stringify(params),
 			onResponse: this.handleGameResponse(callback)
 		};

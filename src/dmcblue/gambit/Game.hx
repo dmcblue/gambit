@@ -5,13 +5,13 @@ import dmcblue.gambit.errors.OccupiedSpaceError;
 import dmcblue.gambit.errors.WrongTeamError;
 import dmcblue.gambit.Board;
 import dmcblue.gambit.Display;
-import dmcblue.gambit.GameMaster;
+import dmcblue.gambit.GameSource;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import interealmGames.common.errors.Error;
 
-class Game implements GameMaster {
+class Game implements GameSource {
 	public var board:Board;
 	public var currentPlayer:Piece;
 	public var display:Display;

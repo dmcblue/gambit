@@ -52,6 +52,7 @@ class HandlersGetTest extends Test
 		Assert.equals(board, Reflect.field(response, 'board'));
 		Assert.equals(GameState.PLAYING, Reflect.field(response, 'state'));
 		Assert.isFalse(Reflect.hasField(response, 'player'));
+		Assert.isFalse(Reflect.hasField(response, 'team'));
 	}
 
 	public function testNotFound() {
