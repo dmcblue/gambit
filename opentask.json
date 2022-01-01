@@ -20,6 +20,10 @@
 		"name": "sed",
 		"command": "sed",
 		"testArgument": "'s/ga/ga/g' <<< 'ga'"
+	},{
+		"name": "haxelib",
+		"command": "haxelib",
+		"testArgument": "version"
 	}],
 		
 	"tasks": [{
@@ -97,6 +101,15 @@
 		}],
 		"command": "haxelib",
 		"arguments": ["install", "dotenv"]
+	},{
+		"name": "init:haxe:redis",
+		"description": "Installs hxneko-redis",
+		"groups": [{
+			"name": "init:haxe",
+			"rank": 3
+		}],
+		"command": "haxelib",
+		"arguments": ["install", "hxneko-redis"]
 	},
 
 	{
