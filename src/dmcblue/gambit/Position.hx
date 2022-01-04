@@ -30,6 +30,13 @@ abstract Position(Point) {
 		return new Position(this.x + other.x, this.y + other.y);
 	}
 
+	public function toPoint():Point {
+		return {
+			x: this.x,
+			y: this.y
+		};
+	}
+
 	public function toString():String {
 		return '{x: ${this.x}, y: ${this.y}}';
 	}

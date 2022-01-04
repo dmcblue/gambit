@@ -159,8 +159,11 @@
 		}],
 		"command": "haxe",
 		"arguments": [
+			"-lib", "haxe-crypto",
 			"-cp", "src",
+			"-cp", "browser/src",
 			"-cp", "common/src",
+			"-cp", "server/src",
 			"--interp",
 			"--main", "dmcblue.gambit.terminal.Main"
 		]
@@ -243,7 +246,6 @@
 		"command": "sed",
 		"arguments": [
 			"-i",
-			"\".bak\"",
 			"s+Main::main+return Main::getHandlers+g",
 			"bin/index.php"
 		],

@@ -37,8 +37,7 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 
 		if (this.currentPlayer != null) {
 			obj.player = this.currentPlayer;
-trace(haxe.Json.stringify(gameRecord));
-trace(this.currentPlayer);
+
 			if (gameRecord.black != "" || gameRecord.white != "") {
 				obj.team = gameRecord.black == this.currentPlayer ? Piece.BLACK : Piece.WHITE;
 			}

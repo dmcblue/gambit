@@ -1,5 +1,6 @@
 package dmcblue.gambit.terminal;
 
+import dmcblue.gambit.Display.StartChoice;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
@@ -10,6 +11,9 @@ import dmcblue.gambit.Game;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
+import dmcblue.gambit.server.GameState;
+import interealmGames.common.uuid.Uuid;
+import interealmGames.common.uuid.UuidV4;
 
 class Display implements DisplayInterface {
 	static public var ROW_IDS = ['A', 'B', 'C', 'D'];
@@ -41,6 +45,22 @@ class Display implements DisplayInterface {
 	/**
 		@implements DisplayInterface
 	**/
+	public function createJoinResume():StartChoice {
+		Sys.print(
+			'Would you like to (c)reate or (j)oin a game? (c/j) '
+		);
+		var options:Array<String> = ['c', 'j'];
+		var input:String = this.getResponse(options);
+		return switch(input) {
+			case 'c': StartChoice.CREATE;
+			case 'j': StartChoice.JOIN;
+			default: null;
+		};
+	}
+
+	/**
+		@implements DisplayInterface
+	**/
 	public function displayError(error:Error):Void {
 		Sys.println(error.message);
 	}
@@ -48,9 +68,9 @@ class Display implements DisplayInterface {
 	/**
 		@implements DisplayInterface
 	**/
-	public function endGame(scores:Map<Piece,Int>, game:GameMaster):Void {
+	public function endGame(scores:Map<Piece,Int>, board:Array<Array<Piece>>):Void {
 		Sys.println('');
-		Sys.println(this.boardToString(game.getBoard()));
+		Sys.println(this.boardToString(board));
 		Sys.println('');
 		var blackScore = scores.get(Piece.BLACK);
 		var whiteScore = scores.get(Piece.WHITE);
@@ -81,20 +101,27 @@ class Display implements DisplayInterface {
 		Sys.exit(0);
 	}
 
-	/**
-		@implements DisplayInterface
-	**/
-	public function getResponse(numOptions:Int, passable:Bool = false):String {
-		var options:Array<String> = [];
-		if (passable) {
-			options.push('p');
-			options.push('P');
-		}
-		for(i in 1...(numOptions + 1)) {
-			options.push('$i');
-		}
+	public function getGameId():UuidV4 {
+		Sys.print(
+			'Please enter the game id:'
+		);
 		while (true) {
-			var input = Sys.stdin().readLine();
+			var input = Sys.stdin().readLine().toLowerCase();
+			if(input.charCodeAt(0) == 27) { //ESC
+				this.exit();
+			}
+
+			if(Uuid.isV4(input)) {
+				return input;
+			}
+
+			Sys.print('Invalid game id, please try again:');
+		}
+	}
+
+	public function getResponse(options:Array<String>):String {
+		while (true) {
+			var input = Sys.stdin().readLine().toLowerCase();
 			if(input.charCodeAt(0) == 27) { //ESC
 				this.exit();
 			}
@@ -106,6 +133,26 @@ class Display implements DisplayInterface {
 			}
 
 			Sys.print('Invalid reponse, please try again:');
+		}
+	}
+
+	public function getResponseInt(numOptions:Int):Int {
+		var options:Array<String> = [];
+		for(i in 1...(numOptions + 1)) {
+			options.push('$i');
+		}
+		return Std.parseInt(this.getResponse(options));
+	}
+
+	public function getTeamChoice():Piece {
+		Sys.println(
+			'Which team would you like to play as? (x/o)'
+		);
+		var choice = this.getResponse(['o','x']);
+		return switch(choice) {
+			case 'o': Piece.WHITE;
+			case 'x': Piece.BLACK;
+			default: Piece.BLACK;
 		}
 	}
 
@@ -149,7 +196,7 @@ class Display implements DisplayInterface {
 		for(i in 0...options.length) {
 			Sys.println('\t${i + 1}:\t${options[i]}');
 		}
-		var answer = options[Std.parseInt(this.getResponse(options.length+1)) - 1];
+		var answer = options[this.getResponseInt(options.length+1) - 1];
 
 		return answer == 'Yes';
 	}
@@ -165,7 +212,7 @@ class Display implements DisplayInterface {
 	/**
 		@implements DisplayInterface
 	**/
-	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>, game:GameMaster):Null<Move> {
+	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>):Null<Move> {
 		var teamStr = this.pieceToString(currentPlayer);
 		var positionStr = this.positionToString(position);
 		Sys.println('$currentPlayer ($teamStr) has a follow-up move for Position "$positionStr":');
@@ -176,7 +223,12 @@ class Display implements DisplayInterface {
 		}
 		Sys.println('\tP:\tTo pass');
 		Sys.print('Please enter which move: ');
-		var input = this.getResponse(moves.length, true);
+		var options:Array<String> = [];
+		for(i in 1...(moves.length + 1)) {
+			options.push('$i');
+		}
+		options.push('p');
+		var input = this.getResponse(options);
 		if (input.toLowerCase() == 'p') {
 			return null;
 		}
@@ -192,33 +244,33 @@ class Display implements DisplayInterface {
 	/**
 		@implements DisplayInterface
 	**/
-	public function requestNextMove(currentPlayer:Piece, positions:Array<Position>, game:GameMaster):Null<Move> {
+	public function requestNextMoveFrom(currentPlayer:Piece, positions:Array<Position>):Position {
 		var teamStr = this.pieceToString(currentPlayer);
-		Sys.println('Please select the next $currentPlayer ($teamStr) move:');
+		Sys.println('Please select the next move:');
 		Sys.println('The following pieces are available to move:');
 		for(i in 0...positions.length) {
 			var position = this.positionToString(positions[i]);
 			Sys.println('\t${i + 1}:\t$position');
 		}
 		Sys.print('Please enter which position: ');
-		var input = this.getResponse(positions.length);
-		var choice = Std.parseInt(input);
-		var from = positions[choice - 1];
+		var choice = this.getResponseInt(positions.length);
+		return positions[choice - 1];
+	}
 
+	/**
+		@implements DisplayInterface
+	**/
+	public function requestNextMoveTo(currentPlayer:Piece, moves:Array<Position>):Position {
 		Sys.println('The following moves are available:');
-		var moves = game.getMoves(from);
 		for(i in 0...moves.length) {
 			var position = this.positionToString(moves[i]);
 			Sys.println('\t${i + 1}:\t$position');
 		}
 		Sys.print('Please enter which move: ');
-		var choice = Std.parseInt(this.getResponse(moves.length));
+		var choice = this.getResponseInt(moves.length);
 		var to = moves[choice - 1];
 
-		return {
-			to: to,
-			from: from
-		};
+		return to;
 	}
 
 	/**
@@ -248,26 +300,19 @@ class Display implements DisplayInterface {
 	/**
 		Display the current game state
 	**/
-	public function showBoard(currentPlayer:Piece, board:Array<Array<Piece>>):Void {
+	public function showBoard(currentPlayer:Piece, isMe:Bool, gameState:GameState, board:Array<Array<Piece>>):Void {
 		Sys.println('');
-		Sys.println('Current Player: ${this.pieceToString(currentPlayer)}');
+		if (gameState == GameState.WAITING) {
+			Sys.println('Waiting for opponent to join.');
+		} else {
+			if (isMe) {
+				Sys.println('Your Move (${this.pieceToString(currentPlayer)}).');
+			} else {
+				Sys.println('Waiting for ${this.pieceToString(currentPlayer)} to move.');
+			}
+		}
 		Sys.println('');
 		Sys.println(this.boardToString(board));
 		Sys.println('');
 	}
-
-	// public function positionFromString(str:String):Null<Position> {
-	// 	if (str.toLowerCase() == 'p') {
-	// 		return null;
-	// 	}
-
-	// 	if(!Display.COL_IDS.contains(str.charAt(1)) || !Display.ROW_IDS.contains(str.charAt(0)) {
-
-	// 	}
-
-	// 	var x = Display.COL_IDS.indexOf(str.charAt(1));
-	// 	var y = Display.ROW_IDS.indexOf(str.charAt(0));
-
-	// 	return new Position(x, y);
-	// }
 }

@@ -68,3 +68,9 @@ Alternatively, you can read `opentask.json` for the list of explicit commands.
 
 - Create asynchronous web server version
 - Create AI player
+
+## Server Setup
+
+- Requires Redis to be installed and running
+- If using PHP:
+	- Make sure the `sockets` extension is enabled in `php.ini`.
