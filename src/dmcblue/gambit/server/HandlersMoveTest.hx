@@ -62,7 +62,7 @@ class HandlersMoveTest extends Test
 		Assert.equals(GameState.PLAYING, Reflect.field(response, 'state'));
 		Assert.isTrue(Reflect.hasField(response, 'player'));
 		Assert.isTrue(Uuid.isV4(Reflect.field(response, 'player')));
-		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
+		Assert.equals(playerId, Reflect.field(response, 'player'));
 		Assert.isTrue(Reflect.hasField(response, 'team'));
 		Assert.equals(Piece.BLACK, Reflect.field(response, 'team'));
 	}

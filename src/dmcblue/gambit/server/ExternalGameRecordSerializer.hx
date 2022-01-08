@@ -12,13 +12,13 @@ import dmcblue.gambit.server.GameRecord;
 class ExternalGameRecordObjectSerializer extends Json<ExternalGameRecordObject> {}
 
 class ExternalGameRecordSerializer implements Serializer<GameRecord> {
-	private var currentPlayer:UuidV4;
+	private var sessionPlayer:UuidV4;
 	private var objectSerializer:ExternalGameRecordObjectSerializer;
 	private var persistence:ObjectPersistence<String, GameRecord>;
-	public function new(persistence:ObjectPersistence<String, GameRecord>, currentPlayer:UuidV4) {
+	public function new(persistence:ObjectPersistence<String, GameRecord>, sessionPlayer:UuidV4) {
 		this.objectSerializer = new ExternalGameRecordObjectSerializer();
 		this.persistence = persistence;
-		this.currentPlayer = currentPlayer;
+		this.sessionPlayer = sessionPlayer;
 	}
 
 	public function decode(s:String):GameRecord {
@@ -35,11 +35,11 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 			state: gameRecord.state
 		};
 
-		if (this.currentPlayer != null) {
-			obj.player = this.currentPlayer;
+		if (this.sessionPlayer != null) {
+			obj.player = this.sessionPlayer;
 
 			if (gameRecord.black != "" || gameRecord.white != "") {
-				obj.team = gameRecord.black == this.currentPlayer ? Piece.BLACK : Piece.WHITE;
+				obj.team = gameRecord.black == this.sessionPlayer ? Piece.BLACK : Piece.WHITE;
 			}
 		}
 

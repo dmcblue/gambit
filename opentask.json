@@ -184,6 +184,21 @@
 			"--interp",
 			"--main", "dmcblue.gambit.Main"
 		]
+	},{
+		"name": "run:ai",
+		"description": "Runs",
+		"groups": [{
+			"name": "run",
+			"rank": 0
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-cp", "src",
+			"-cp", "common/src",
+			"-cp", "persistence/src",
+			"--interp",
+			"--main", "dmcblue.gambit.ai.Builder"
+		]
 	},
 
 	{

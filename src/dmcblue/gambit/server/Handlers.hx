@@ -161,19 +161,28 @@ class Handlers {
 				}
 
 				game.board.move(move);
-				if (game.board.isOver()) {
-					game.state = GameState.DONE;
+				if (game.board.getMoves(move.to).length > 0) {
+					game.canPass = true;
 				} else {
-					// make sure the other player has moves
-					if (game.board.getMoves(move.to).length > 0) {
-						game.canPass = true;
-					} else {
+					if (game.board.hasAnyMoreMoves(game.opposingPlayer)) {
 						game.next();
+					} else {
+						game.state = GameState.DONE;
 					}
 				}
+				// if (game.board) {
+				// 	game.state = GameState.DONE;
+				// } else {
+				// 	// make sure the other player has moves
+				// 	if (game.board.getMoves(move.to).length > 0) {
+				// 		game.canPass = true;
+				// 	} else {
+				// 		game.next();
+				// 	}
+				// }
 
 				persistence.save(game);
-				var serializer = new ExternalGameRecordSerializer(persistence, game.currentPlayerId());
+				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
 				return serializer.encode(game);
 			}
 		};
@@ -198,7 +207,7 @@ class Handlers {
 				game.next();
 
 				persistence.save(game);
-				var serializer = new ExternalGameRecordSerializer(persistence, game.currentPlayerId());
+				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
 				return serializer.encode(game);
 			}
 		};

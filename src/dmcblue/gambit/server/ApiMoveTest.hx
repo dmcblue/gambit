@@ -58,7 +58,7 @@ class ApiMoveTest extends Test
 			Assert.equals(GameState.PLAYING, Reflect.field(game, 'state'));
 			Assert.isTrue(Reflect.hasField(game, 'player'));
 			Assert.isTrue(Uuid.isV4(Reflect.field(game, 'player')));
-			Assert.equals(otherPlayerId, Reflect.field(game, 'player'));
+			Assert.equals(playerId, Reflect.field(game, 'player'));
 			async.done();
 		});
 	}

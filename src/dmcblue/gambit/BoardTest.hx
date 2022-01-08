@@ -101,8 +101,7 @@ class BoardTest extends Test
 			'22000000' +
 			'00000000';
 		var board = Board.fromString(str);
-		// var positions = board.getPositions(Piece.WHITE);
-		// trace(positions);
+
 		var position = new Position(0, 1);
 		var moves = board.getMoves(position);
 		var expectedMoves:Array<Position> = [
@@ -184,53 +183,6 @@ class BoardTest extends Test
 
 				Assert.same(island, test.expected, test.start.toString());
 			}
-		}
-	}
-	
-	/**
-	 * Basic tests for capitalization
-	 */
-	public function testIsOver() {
-		var tests:Array<IsOverTest> = [{
-			board:
-				'00000000' +
-				'12000000' +
-				'22000000' +
-				'00000000',
-			expected: false,
-		}, {
-			board:
-				'00000000' +
-				'02010000' +
-				'22000000' +
-				'00000000',
-			expected: true,
-		}, {
-			board:
-				'00100000' +
-				'02000000' +
-				'22000000' +
-				'00000000',
-			expected: true, // yes, true
-		}, {
-			board:
-				'00000000' +
-				'00100000' +
-				'22000000' +
-				'02000000',
-			expected: false,
-		}, {
-			board:
-				'00000000' +
-				'11111111' +
-				'22222222' +
-				'00000000',
-			expected: false,
-		}];
-
-		for(test in tests) {
-			var board = Board.fromString(test.board);
-			Assert.equals(board.isOver(), test.expected, test.board);
 		}
 	}
 

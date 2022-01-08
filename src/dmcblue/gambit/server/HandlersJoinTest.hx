@@ -29,9 +29,9 @@ class HandlersJoinTest extends Test
 			"1234",
 			Piece.BLACK,
 			Board.newGame(),
-			false, // black
+			false,
+			"", // black
 			otherPlayerId, // white
-			"",
 			GameState.WAITING
 		);
 		Test.persistence.getGameRecordPersistence().save(game);
@@ -51,7 +51,6 @@ class HandlersJoinTest extends Test
 		Assert.notEquals(otherPlayerId, Reflect.field(response, 'player'));
 		Assert.isTrue(Reflect.hasField(response, 'team'));
 		Assert.equals(Piece.BLACK, Reflect.field(response, 'team'));
-		trace(haxe.Json.stringify(response));
 	}
 
 	public function testNotFound() {

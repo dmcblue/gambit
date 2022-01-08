@@ -19,6 +19,10 @@ class GameRecordPersistence implements ObjectPersistence<String, GameRecord> {
 			);
 	}
 
+	public function delete(id:String):Void {
+		this.gameRecordObjectPersistence.delete(id);
+	}
+
 	public function get(id:String):Null<GameRecord> {
 		var gro:Null<GameRecordObject> = this.gameRecordObjectPersistence.get(id);
 		return gro == null ? null : GameRecord.fromObject(gro);

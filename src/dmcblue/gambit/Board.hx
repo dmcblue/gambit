@@ -246,14 +246,6 @@ class Board {
 	}
 
 	/**
-		Returns whether all players are out of moves
-		@TODO Remove, this isn't technically game over.
-	**/
-	public function isOver() {
-		return !this.hasAnyMoreMoves(Piece.WHITE) && !this.hasAnyMoreMoves(Piece.BLACK);
-	}
-
-	/**
 		Determines if a move is valid
 		@TODO Should this be in the Board class?
 	**/
@@ -339,8 +331,6 @@ class Board {
 
 	/**
 		Converts the board to a readable format.
-		Note: This is NOT the opposing method to Board.fromString
-		as it contains new lines for readability.
 		0's are empty spaces,
 		1's are the one player,
 		2's are the opposing player.
