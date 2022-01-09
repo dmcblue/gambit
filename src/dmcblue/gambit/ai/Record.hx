@@ -11,7 +11,6 @@ typedef Child = {
 
 typedef RecordObject = {
 	var name:String;
-	var parent:String;
 	var children:Array<Child>;
 };
 
@@ -23,18 +22,15 @@ class Record {
 	static public function fromObject(record:RecordObject):Record {
 		return new Record(
 			record.name,
-			record.parent,
 			record.children
 		);
 	}
 
 	public var name:String;
-	public var parent:String;
 	public var children:Array<Child>;
 
-	public function new(name:String, parent:String, children:Array<Child>) {
+	public function new(name:String, children:Array<Child>) {
 		this.name = name;
-		this.parent = parent;
 		this.children = children;
 	}
 
@@ -78,7 +74,6 @@ class Record {
 		return this.children.map(function(child:Child) {
 			var record = new Record(
 				child.name,
-				this.name,
 				[]
 			);
 			record.createChildren();
@@ -89,7 +84,6 @@ class Record {
 	public function toObject():RecordObject {
 		return {
 			name: this.name,
-			parent: this.parent,
 			children: this.children
 		};
 	}

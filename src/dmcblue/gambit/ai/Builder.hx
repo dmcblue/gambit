@@ -13,11 +13,13 @@ import sys.FileSystem;
 
 class Builder {
 	static public var ROOT = 'root';
+	static private var QUEUE_PATH = '/home/dmcblue/repos/tmp/queue/';
 
 	static public function main():Void {
 		var connection = new FileConnection('/home/dmcblue/repos/tmp/', 'json');
 		var recordPersistence:ObjectPersistence<String, Record> = new RecordPersistence(connection);
 		var builder = new Builder(recordPersistence);
+
 		trace('Cleaning');
 		builder.clean();
 		trace('Cleaned');
@@ -27,20 +29,20 @@ class Builder {
 	}
 
 	private var recordPersistence:ObjectPersistence<String, Record>;
-	private var queue:Queue<String> = new FileQueue('/home/dmcblue/repos/gambit/queue/');
+	private var queue:Queue<String> = new FileQueue(Builder.QUEUE_PATH);
 
 	public function new(recordPersistence:ObjectPersistence<String, Record>) {
 		this.recordPersistence = recordPersistence;
+		this.queue = new FileQueue(Builder.QUEUE_PATH);
 	}
 
 	public function build() {
-		//this.queue = new FileQueue('/home/dmcblue/repos/gambit/queue/');
-		this.queue = new ArrayQueue();
+		this.queue = new FileQueue(Builder.QUEUE_PATH);
+		//this.queue = new ArrayQueue<String>();
 		var board = Board.newGame();
 		var rootName = Record.createName(Piece.BLACK, board);
 		var root = new Record(
 			rootName,
-			Builder.ROOT,
 			[]
 		);
 		this.recordPersistence.save(root);
@@ -61,11 +63,12 @@ class Builder {
 	}
 
 	public function clean() {
-		this.queue = new FileQueue('/home/dmcblue/repos/gambit/queue/');
+		// this.queue = new FileQueue(Builder.QUEUE_PATH);
+		// this.queue = new ArrayQueue<String>();
 		while(this.queue.hasNext()) {
 			this.queue.next();
 			// var name = this.queue.next();
-			//FileSystem.deleteFile('/home/dmcblue/repos/gambit/queue/${name}');
+			//FileSystem.deleteFile('/home/dmcblue/repos/tmp/${name}');
 		}
 		var records = this.recordPersistence.getAll();
 		for(record in records) {
