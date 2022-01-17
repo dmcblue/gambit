@@ -34,12 +34,22 @@ class Record {
 		this.children = children;
 	}
 
+	public function board():Board {
+		var boardStr = this.name.substring(1);
+		return Board.fromString(boardStr);
+	}
+
+	public function team():Piece {
+		return PieceTools.fromString(this.name.charAt(0));
+	}
+
+
 	// doesn't take into account canPass
 	public function createChildren() {
 		this.children = [];
-		var team = PieceTools.fromString(this.name.charAt(0));
+		var team = this.team();
+		var board = this.board();
 		var boardStr = this.name.substring(1);
-		var board = Board.fromString(boardStr);
 		if(board.hasAnyMoreMoves(team)) {
 			var opposingTeam = team == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
 			var positions = board.getPositionsWithMoves(opposingTeam);
