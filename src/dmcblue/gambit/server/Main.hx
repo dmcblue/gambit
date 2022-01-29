@@ -6,6 +6,7 @@ import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.GameRecordPersistence;
 import dmcblue.gambit.server.Persistence;
 import interealmGames.server.http.RequestHandler;
+import interealmGames.persistence.FileConnection;
 import interealmGames.persistence.RedisConnection;
 import interealmGames.persistence.ObjectPersistence;
 
@@ -17,15 +18,19 @@ class Main
 	
 	static function main() 
 	{
-		var connection = new RedisConnection("localhost", 6379, 7);
+		/*var connection = new RedisConnection("localhost", 6379, 7);
 		var persistence = new Persistence(connection);
 		var handlers = new Handlers(persistence);
-		handlers.getHandlers();
+		handlers.getHandlers();*/
 	}
 
 	static function getHandlers():Array<RequestHandler> {
-		var connection = new RedisConnection("localhost", 6379, 7);
-		var persistence = new Persistence(connection);
+		var serverConnection = new RedisConnection("localhost", 6379, 7);
+		var aiConnection = new FileConnection('/home/dmcblue/repos/tmp/', 'json');
+		var persistence = new Persistence(
+			serverConnection,
+			aiConnection
+		);
 		var handlers = new Handlers(persistence);
 		return handlers.getHandlers();
 	}

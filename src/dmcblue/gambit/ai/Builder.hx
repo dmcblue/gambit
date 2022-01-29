@@ -26,12 +26,13 @@ class Builder {
 		var recordPersistence:ObjectPersistence<String, Record> = new RecordPersistence(connection);
 		var builder = new Builder(recordPersistence);
 
-		var clean = false;
-		var build = false;
+		var clean = true;
+		var build = true;
 		var eval = true;
 
 		if (clean) {
 			Sys.println('Cleaning');
+			builder.deleteCurrent();
 			builder.clean();
 			Sys.println('Cleaned');
 		}
@@ -45,6 +46,7 @@ class Builder {
 				Sys.println('Building');
 				builder.build();
 			}
+			builder.deleteCurrent();
 			Sys.println('Built');
 		}
 
@@ -61,6 +63,10 @@ class Builder {
 	public function new(recordPersistence:ObjectPersistence<String, Record>) {
 		this.recordPersistence = recordPersistence;
 		this.queue = new FileQueue(Builder.QUEUE_PATH);
+	}
+
+	public function deleteCurrent():Void {
+		FileSystem.deleteFile(Builder.CURRENT_PATH);
 	}
 
 	public function getCurrent():String {

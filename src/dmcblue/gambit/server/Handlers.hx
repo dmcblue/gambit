@@ -20,13 +20,16 @@ import dmcblue.gambit.server.GameRecord;
 import dmcblue.gambit.server.Persistence;
 import haxe.Json as Json;
 import interealmGames.common.uuid.Uuid;
+import dmcblue.gambit.server.parameters.AiMoveParams;
 import dmcblue.gambit.server.parameters.CreateParams;
 import dmcblue.gambit.server.parameters.MoveParams;
+import dmcblue.gambit.ai.Ai;
+import dmcblue.gambit.ai.Level;
 
 using interealmGames.common.StringToolsExtension;
 
 class Handlers {
-	static public var ERROR_INVALID_PARAMETERS = "Invalid parameters.";
+	static public var AI_PLAYER = "AI_PLAYER";
 	static public var ERROR_GAME_DNE = "There is no game with the ID '%s'";
 	static public var ERROR_GAME_FINISHED = "This game is already finished.";
 	static public var ERROR_GAME_IN_PROGRESS = "You cannot join, this game is already in progress.";
@@ -37,6 +40,9 @@ class Handlers {
 	static public var ERROR_GAME_NOT_PASSABLE = "Cannot pass this turn.";
 	static public var ERROR_GAME_NOT_STARTED = "This game has not started yet.";
 	static public var ERROR_GAME_NOT_TURN = "Not this players turn.";
+	static public var ERROR_INVALID_AI_REQUEST = "Cannot request AI Move.";
+	static public var ERROR_INVALID_LEVEL = "Invalid level.";
+	static public var ERROR_INVALID_PARAMETERS = "Invalid parameters.";
 	static public var MESSAGE_STATUS_ONLINE = "Service online";
 
 	private var persistence:Persistence;
@@ -47,6 +53,8 @@ class Handlers {
 	public function getHandlers():Array<RequestHandler> {
 		var handlers:Array<RequestHandler> = [];
 
+		handlers.push(this.wrap(this.aiJoin()));
+		handlers.push(this.wrap(this.aiMove()));
 		handlers.push(this.wrap(this.create()));
 		handlers.push(this.wrap(this.get()));
 		handlers.push(this.wrap(this.join()));
@@ -55,6 +63,94 @@ class Handlers {
 		handlers.push(this.wrap(this.status()));
 		
 		return handlers;
+	}
+
+	public function aiJoin():RequestHandler {
+		return {
+			type: RequestType.GET,
+			path: "/game/{id}/ai/join",
+			handler: function(request:Request) {
+				var gameId = request.getPathArgument('id');
+				var persistence = this.persistence.getGameRecordPersistence();
+				var game:GameRecord = persistence.get(gameId);
+
+				this.checkGameExistsError(gameId, game);
+
+				if (game.state != GameState.WAITING) {
+					throw ClientError.badRequest(Handlers.ERROR_GAME_IN_PROGRESS);
+				}
+
+				if (game.black.length > 0 && game.white.length > 0) {
+					throw ServerError.general(Handlers.ERROR_GAME_INVALID);
+				}
+
+				var playerId = Handlers.AI_PLAYER;
+				if (game.black.length > 0) {
+					game.white = playerId;
+				} else {
+					game.black = playerId;
+				}
+
+				game.state = GameState.PLAYING;
+				persistence.save(game);
+				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
+				return serializer.encode(game);
+			}
+		};
+	}
+
+	public function aiMove():RequestHandler {
+		return {
+			type: RequestType.POST,
+			path: "/game/{id}/ai/move/",
+			handler: function(request:Request) {
+				var params:AiMoveParams = cast parseParams(request, ['level', 'player']);
+				var playerId:UuidV4 = params.player;
+				var levelInt:Int = cast params.level;
+
+				var gameId = request.getPathArgument('id');
+				var persistence = this.persistence.getGameRecordPersistence();
+				var game:GameRecord = persistence.get(gameId);
+				var aiId = Handlers.AI_PLAYER;
+				this.checkRunningGameError(gameId, game, aiId);
+
+				if (game.opposingPlayerId() != playerId) {
+					throw ClientError.badRequest(Handlers.ERROR_INVALID_AI_REQUEST);
+				}
+
+				if ([Level.EASY, Level.MEDIUM, Level.HARD].indexOf(cast levelInt) == -1) {
+					throw ClientError.badRequest(Handlers.ERROR_INVALID_LEVEL);
+				}
+				var level:Level = cast levelInt;
+
+				var ai = new Ai(this.persistence.getAiRecordPersistence());
+				var move = ai.getMove(level, Piece.BLACK, Board.newGame());
+
+				// Leave this in?
+				if (!game.board.isValidMove(move)) {
+					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
+				}
+
+				if (game.board.pieceAt(move.from) != game.currentPlayer) {
+					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
+				}
+
+				game.board.move(move);
+				if (game.board.getMoves(move.to).length > 0) {
+					game.canPass = true;
+				} else {
+					if (game.board.hasAnyMoreMoves(game.opposingPlayer)) {
+						game.next();
+					} else {
+						game.state = GameState.DONE;
+					}
+				}
+
+				persistence.save(game);
+				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
+				return serializer.encode(game);
+			}
+		};
 	}
 
 	public function create():RequestHandler {

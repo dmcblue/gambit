@@ -35,8 +35,11 @@ class Record {
 	}
 
 	public function board():Board {
-		var boardStr = this.name.substring(1);
-		return Board.fromString(boardStr);
+		return Board.fromString(this.boardString());
+	}
+
+	public function boardString():String {
+		return this.name.substring(1);
 	}
 
 	public function team():Piece {
@@ -52,7 +55,7 @@ class Record {
 		var boardStr = this.name.substring(1);
 		if(board.hasAnyMoreMoves(team)) {
 			var opposingTeam = team == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
-			var positions = board.getPositionsWithMoves(opposingTeam);
+			var positions = board.getPositionsWithMoves(team);
 			for(from in positions) {
 				var tos = board.getMoves(from);
 				for(to in tos) {

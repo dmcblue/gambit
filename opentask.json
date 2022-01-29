@@ -110,6 +110,15 @@
 		}],
 		"command": "haxelib",
 		"arguments": ["install", "hxneko-redis"]
+	},{
+		"name": "init:haxe:thx",
+		"description": "Installs thx.core",
+		"groups": [{
+			"name": "init:haxe",
+			"rank": 4
+		}],
+		"command": "haxelib",
+		"arguments": ["install", "thx.core"]
 	},
 
 	{
@@ -129,17 +138,35 @@
 		]
 	},
 	{
+		"name": "test:ai",
+		"description": "Runs all tests for the gambit:ai library",
+		"groups": [{
+			"name": "test",
+			"rank": 1
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-lib", "utest",
+			"-lib", "thx.core",
+			"-cp", "src",
+			"-cp", "common/src",
+			"-cp", "persistence/src",
+			"--interp",
+			"--main", "dmcblue.gambit.ai.Test"
+		]
+	},
+	{
 		"name": "test:server",
 		"description": "Runs all tests for the gambit:server library",
 		"groups": [{
 			"name": "test",
-			"rank": 0
+			"rank": 2
 		}],
 		"command": "haxe",
 		"arguments": [
 			"-lib", "utest",
 			"-lib", "haxe-crypto",
-			"-lib", "dotenv",
+			"-lib", "thx.core",
 			"-cp", "src",
 			"-cp", "browser/src",
 			"-cp", "common/src",
@@ -181,6 +208,7 @@
 			"-cp", "src",
 			"-cp", "browser/src",
 			"-cp", "common/src",
+			"-cp", "server/src",
 			"--interp",
 			"--main", "dmcblue.gambit.Main"
 		]

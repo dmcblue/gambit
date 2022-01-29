@@ -1,8 +1,10 @@
 package dmcblue.gambit.server;
 
 import interealmGames.server.http.ErrorObject;
+import dmcblue.gambit.server.parameters.AiMoveParams;
 import dmcblue.gambit.server.parameters.MoveParams;
 import interealmGames.common.uuid.UuidV4;
+import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import dmcblue.gambit.server.parameters.CreateParams;
@@ -50,6 +52,23 @@ class Api {
 				callback(null, error);
 			}
 		};
+	}
+
+	public function aiJoin(id:UuidV4, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {
+		var request:GetRequest = {
+			url: this.url + '/game/${id}/ai/join',
+			onResponse: this.handleGameResponse(callback)
+		};
+		this.api.get(request);
+	}
+
+	public function aiMove(gameId:UuidV4, params:AiMoveParams, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {
+		var request:PostRequest = {
+			url: this.url + '/game/${gameId}/ai/move/',
+			data: Json.stringify(params),
+			onResponse: this.handleGameResponse(callback)
+		};
+		this.api.post(request);
 	}
 
 	public function create(params:CreateParams, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {

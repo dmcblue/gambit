@@ -73,6 +73,10 @@ class GameRecord {
 		this.currentPlayer = this.currentPlayer == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
 	}
 
+	public function opposingPlayerId():UuidV4 {
+		return this.opposingPlayer == Piece.BLACK ? this.black : this.white;
+	}
+
 	public function toObject():GameRecordObject {
 		return {
 			id: this.id,
