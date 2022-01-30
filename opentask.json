@@ -94,13 +94,13 @@
 		"arguments": ["install", "haxe-crypto"]
 	},{
 		"name": "init:haxe:dotenv",
-		"description": "Installs haxe dotenv",
+		"description": "Installs haxe dotenv.hx",
 		"groups": [{
 			"name": "init:haxe",
 			"rank": 2
 		}],
 		"command": "haxelib",
-		"arguments": ["install", "dotenv"]
+		"arguments": ["install", "dotenv.hx"]
 	},{
 		"name": "init:haxe:redis",
 		"description": "Installs hxneko-redis",
@@ -205,6 +205,7 @@
 		}],
 		"command": "haxe",
 		"arguments": [
+			"-lib", "dotenv.hx",
 			"-cp", "src",
 			"-cp", "browser/src",
 			"-cp", "common/src",

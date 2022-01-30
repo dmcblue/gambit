@@ -11,6 +11,6 @@ class Main
 {
 	static function main() 
 	{
-
+		new dotenv.Dotenv().load();
 	}
 }
