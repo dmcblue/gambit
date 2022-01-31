@@ -239,8 +239,11 @@
 		}],
 		"command": "haxe",
 		"arguments": [
+			"-lib", "haxe-crypto",
 			"-cp", "src",
+			"-cp", "browser/src",
 			"-cp", "common/src",
+			"-cp", "server/src",
 			"--cpp", "bin/cpp",
 			"-main", "dmcblue.gambit.terminal.Main"
 		]
@@ -270,8 +273,10 @@
 		}],
 		"command": "haxe",
 		"arguments": [
+			"-lib", "dotenv.hx",
 			"-lib", "haxe-crypto",
 			"-lib", "hxneko-redis",
+			"-lib", "thx.core",
 			"-cp", "src",
 			"-cp", "common/src",
 			"-cp", "persistence/src",

@@ -27,7 +27,7 @@ class GameManager {
 	private var playerId:UuidV4;
 	private var gameId:UuidV4;
 	private var team:Piece;
-	// private var game
+
 	public function new(api:Api, display:Display) {
 		this.api = api;
 		this.display = display;

@@ -6,7 +6,7 @@ class PieceTools {
 			case Piece.NONE: '0';
 			case Piece.WHITE: '1';
 			case Piece.BLACK: '2';
-			default: null;
+			default: '0';
 		};
 	}
 
@@ -15,7 +15,7 @@ class PieceTools {
 			case '0': Piece.NONE;
 			case '1': Piece.WHITE;
 			case '2': Piece.BLACK;
-			default: null;
+			default: Piece.NONE;
 		};
 	}
 }

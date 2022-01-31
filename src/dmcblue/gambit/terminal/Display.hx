@@ -7,7 +7,6 @@ import dmcblue.gambit.Position;
 import dmcblue.gambit.PieceTools;
 import dmcblue.gambit.Display in DisplayInterface;
 import interealmGames.common.errors.Error;
-import dmcblue.gambit.Game;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;

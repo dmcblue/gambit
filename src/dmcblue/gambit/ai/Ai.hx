@@ -43,7 +43,6 @@ class Ai {
 
 			return 1;
 		});
-		// trace(children);
 
 		var factor = switch(level) {
 			case Level.EASY: 1;
@@ -80,9 +79,6 @@ class Ai {
 	}
 
 	public function moveFromStrings(team:Piece, start:String, finish:String):Move {
-		// trace('Start: $start');
-		// trace('Finish: $finish');
-
 		var startIndices:Set<Int> = Set.createInt(StringTools.indexOfAll(start, PieceTools.toString(team)));
 		var finishIndices:Set<Int> = Set.createInt(StringTools.indexOfAll(finish, PieceTools.toString(team)));
 		var startIndex:Int = startIndices.difference(finishIndices).toArray()[0];

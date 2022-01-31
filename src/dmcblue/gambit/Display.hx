@@ -1,7 +1,6 @@
 package dmcblue.gambit;
 
 import dmcblue.gambit.Board;
-import dmcblue.gambit.Game;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
