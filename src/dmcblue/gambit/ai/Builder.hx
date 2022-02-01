@@ -66,11 +66,17 @@ class Builder {
 	}
 
 	public function deleteCurrent():Void {
-		FileSystem.deleteFile(Builder.CURRENT_PATH);
+		if(FileSystem.exists(Builder.CURRENT_PATH)) {
+			FileSystem.deleteFile(Builder.CURRENT_PATH);
+		}
 	}
 
 	public function getCurrent():String {
-		return File.getContent(Builder.CURRENT_PATH);	
+		if(FileSystem.exists(Builder.CURRENT_PATH)) {
+			return File.getContent(Builder.CURRENT_PATH);
+		}
+
+		return null;
 	}
 
 	public function setCurrent(name:String):Void {
