@@ -65,14 +65,14 @@ class Record {
 						to: to
 					});
 
-					if (board.getMoves(to).length > 0) {
+					if (tempBoard.getMoves(to).length > 0) {
 						this.children.push({
 							name: Record.createName(team, tempBoard),
 							success: -1
 						});
 					}
 
-					if (board.hasAnyMoreMoves(opposingTeam)) {
+					if (tempBoard.hasAnyMoreMoves(opposingTeam)) {
 						this.children.push({
 							name: Record.createName(opposingTeam, tempBoard),
 							success: -1

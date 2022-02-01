@@ -30,6 +30,9 @@ class Ai {
 	public function getMove(level:Level, team:Piece, board:Board):Move {
 		var name = Record.createName(team, board);
 		var record = this.persistence.get(name);
+		if (record == null) {
+			throw 'ERROR: ${name}';
+		}
 		var children:Array<Child> = record.children;
 		// Reverse Sort
 		children.sort(function(a:Child, b:Child) {
