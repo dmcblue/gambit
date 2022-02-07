@@ -4,18 +4,21 @@ import dmcblue.gambit.Board;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
+import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.GameState;
 import interealmGames.common.errors.Error;
 import interealmGames.common.uuid.UuidV4;
 
 enum StartChoice {
+	AI;
 	CREATE;
 	JOIN;
 	RESUME;
 }
 
 interface Display {
-	public function createJoinResume():StartChoice;
+	public function getGameStart():StartChoice;
+	public function getAiLevel():Level;
 
 	/**
 		Output error to user.

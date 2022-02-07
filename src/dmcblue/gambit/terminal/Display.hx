@@ -10,9 +10,16 @@ import interealmGames.common.errors.Error;
 import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
+import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.GameState;
 import interealmGames.common.uuid.Uuid;
 import interealmGames.common.uuid.UuidV4;
+
+typedef LevelChoice = {
+	choice:Int,
+	label:String,
+	level:Level
+};
 
 class Display implements DisplayInterface {
 	static public var ROW_IDS = ['A', 'B', 'C', 'D'];
@@ -44,17 +51,53 @@ class Display implements DisplayInterface {
 	/**
 		@implements DisplayInterface
 	**/
-	public function createJoinResume():StartChoice {
+	public function getGameStart():StartChoice {
 		Sys.print(
 			'Would you like to (c)reate or (j)oin a game? (c/j) '
 		);
 		var options:Array<String> = ['c', 'j'];
 		var input:String = this.getResponse(options);
+		if(input == 'j') {
+			return StartChoice.JOIN;
+		}
+		Sys.print(
+			'Play against (a)i or (h)uman? (a/h) '
+		);
+		options = ['a', 'h'];
+		input = this.getResponse(options);
 		return switch(input) {
-			case 'c': StartChoice.CREATE;
-			case 'j': StartChoice.JOIN;
+			case 'a': StartChoice.AI;
+			case 'h': StartChoice.CREATE;
 			default: null;
 		};
+	}
+
+	public function getAiLevel():Level {
+		Sys.println('Difficulties:');
+		var choices:Array<LevelChoice> = [{
+			choice: 1,
+			label: "Easy",
+			level: Level.EASY
+		}, {
+			choice: 2,
+			label: "Medium",
+			level: Level.MEDIUM
+		}, {
+			choice: 3,
+			label: "Hard",
+			level: Level.HARD
+		}];
+		var options:Array<String> = [];
+		for(choice in choices) {
+			Sys.println(' ${choice.choice} - ${choice.label}');
+			options.push(Std.string(choice.choice));
+		}
+		Sys.print('What difficulty of opponent? ');
+		var input:Int = Std.parseInt(this.getResponse(options));
+
+		return choices.filter(function(choice) {
+			return choice.choice == input;
+		})[0].level;
 	}
 
 	/**
@@ -131,7 +174,7 @@ class Display implements DisplayInterface {
 				return input;
 			}
 
-			Sys.print('Invalid reponse, please try again:');
+			Sys.print('Invalid reponse, please try again: ');
 		}
 	}
 
@@ -144,8 +187,8 @@ class Display implements DisplayInterface {
 	}
 
 	public function getTeamChoice():Piece {
-		Sys.println(
-			'Which team would you like to play as? (x/o)'
+		Sys.print(
+			'Which team would you like to play as? (x/o) '
 		);
 		var choice = this.getResponse(['o','x']);
 		return switch(choice) {

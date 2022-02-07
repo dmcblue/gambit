@@ -124,7 +124,7 @@ class Handlers {
 				var level:Level = cast levelInt;
 
 				var ai = new Ai(this.persistence.getAiRecordPersistence());
-				var move = ai.getMove(level, Piece.BLACK, Board.newGame());
+				var move = ai.getMove(level, game.currentPlayer, game.board);
 
 				// Leave this in?
 				if (!game.board.isValidMove(move)) {

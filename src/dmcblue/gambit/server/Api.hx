@@ -54,9 +54,9 @@ class Api {
 		};
 	}
 
-	public function aiJoin(id:UuidV4, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {
+	public function aiJoin(gameId:UuidV4, callback:ExternalGameRecordObject -> ErrorObject -> Void):Void {
 		var request:GetRequest = {
-			url: this.url + '/game/${id}/ai/join',
+			url: this.url + '/game/${gameId}/ai/join',
 			onResponse: this.handleGameResponse(callback)
 		};
 		this.api.get(request);

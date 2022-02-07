@@ -16,11 +16,17 @@ import dmcblue.gambit.Piece;
 import haxe.macro.Expr.Error;
 import interealmGames.common.errors.Error;
 import dmcblue.gambit.Display;
+import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.Api;
+import dmcblue.gambit.server.parameters.AiMoveParams;
+
+using haxe.EnumTools;
 
 class GameManager {
 	static public var ERROR_TYPE = "GAMBIT_GAME_MANAGER_ERROR";
 	static public var ERROR_TYPE_API = "GAMBIT_API_ERROR";
+	private var aiLevel:Level;
+	private var aiMode:Bool;
 	private var api:Api;
 	private var display:Display;
 	private var lastPosition:Position;
@@ -69,23 +75,52 @@ class GameManager {
 					haxe.Timer.delay(function() {
 						this.check(false);
 					}, 1000);
+				} else if (game.state == GameState.DONE) {
+					var scores:Map<Piece, Int> = new Map();
+					scores.set(Piece.BLACK, board.calculateScore(Piece.BLACK));
+					scores.set(Piece.WHITE, board.calculateScore(Piece.WHITE));
+					this.display.endGame(scores, board.board);
 				} else if (game.currentPlayer == this.team) {
 					if (game.canPass) {
 						this.getFollowUpMove(board);
 					} else {
 						this.getMove(board);
 					}
-				} else if (game.state == GameState.DONE) {
-					var scores:Map<Piece, Int> = new Map();
-					scores.set(Piece.BLACK, board.calculateScore(Piece.BLACK));
-					scores.set(Piece.WHITE, board.calculateScore(Piece.WHITE));
-					this.display.endGame(scores, board.board);
-				} else {
-					// probably update display
-					haxe.Timer.delay(function() {
-						this.check(false);
-					}, 1000);
+				}  else {
+					if (this.aiMode) {
+						this.getAiMove();
+					} else {
+						// probably update display
+						haxe.Timer.delay(function() {
+							this.check(false);
+						}, 1000);
+					}
 				}
+			}
+		});
+	}
+
+	public function getAiMove() {
+		var params:AiMoveParams = {
+			level: this.aiLevel,
+			player: this.playerId
+		};
+		this.api.aiMove(this.gameId, params, function(game:ExternalGameRecordObject, error: ErrorObject) {
+			if (error != null) {
+				this.display.displayError(new Error(
+					GameManager.ERROR_TYPE_API,
+					error.message
+				));
+			} else {
+				var board = Board.fromString(game.board);
+				this.display.showBoard(
+					game.currentPlayer,
+					this.team == game.currentPlayer,
+					game.state,
+					board.board
+				);
+				// this.check(true);
+				this.check(false);
 			}
 		});
 	}
@@ -105,7 +140,24 @@ class GameManager {
 				this.gameId = game.id;
 				this.playerId = game.player;
 				this.team = myTeam;
-				this.display.invite(this.gameId);
+				if (this.aiMode) {
+					this.joinAi();
+				} else {
+					this.display.invite(this.gameId);
+					this.check(true);
+				}
+			}
+		});
+	}
+
+	public function joinAi() {
+		this.api.aiJoin(this.gameId, function(game:ExternalGameRecordObject, error: ErrorObject) {
+			if (error != null) {
+				this.display.displayError(new Error(
+					GameManager.ERROR_TYPE_API,
+					error.message
+				));
+			} else {
 				this.check(true);
 			}
 		});
@@ -190,8 +242,12 @@ class GameManager {
 	}
 
 	public function run() {
-		var choice = this.display.createJoinResume();
-		if (choice == StartChoice.CREATE) {
+		var choice = this.display.getGameStart();
+		if (choice == StartChoice.AI || choice == StartChoice.CREATE) {
+			this.aiMode = choice == StartChoice.AI;
+			if(this.aiMode) {
+				this.aiLevel = this.display.getAiLevel();
+			}
 			this.create(this.display.getTeamChoice());
 		} else if (choice == StartChoice.JOIN) {
 			this.join(this.display.getGameId());
