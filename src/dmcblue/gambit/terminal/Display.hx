@@ -153,16 +153,20 @@ class Display implements DisplayInterface {
 			'Please enter the game id:'
 		);
 		while (true) {
-			var input = Sys.stdin().readLine().toLowerCase();
-			if(input.charCodeAt(0) == 27) { //ESC
+			try {
+				var input = Sys.stdin().readLine().toLowerCase();
+				if(input.charCodeAt(0) == 27) { //ESC
+					throw new EndGameInterrupt();
+				}
+
+				if(Uuid.isV4(input)) {
+					return input;
+				}
+
+				Sys.print('Invalid game id, please try again:');
+			} catch(e:Eof) {
 				throw new EndGameInterrupt();
 			}
-
-			if(Uuid.isV4(input)) {
-				return input;
-			}
-
-			Sys.print('Invalid game id, please try again:');
 		}
 	}
 
