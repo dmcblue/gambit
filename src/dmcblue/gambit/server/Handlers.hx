@@ -135,7 +135,7 @@ class Handlers {
 					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
 				}
 
-				game.board.move(move);
+				game.move(move);
 				if (game.board.getMoves(move.to).length > 0) {
 					game.canPass = true;
 				} else {
@@ -147,7 +147,7 @@ class Handlers {
 				}
 
 				persistence.save(game);
-				var serializer = new ExternalGameRecordSerializer(persistence, playerId, move);
+				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
 				return serializer.encode(game);
 			}
 		};
@@ -256,7 +256,7 @@ class Handlers {
 					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
 				}
 
-				game.board.move(move);
+				game.move(move);
 				if (game.board.getMoves(move.to).length > 0) {
 					game.canPass = true;
 				} else {

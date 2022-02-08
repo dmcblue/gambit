@@ -28,6 +28,10 @@ class GameRecordPersistenceTest extends Test
 			board: "00000000111111112222222200000000",
 			currentPlayer: Piece.BLACK,
 			canPass: false,
+			lastMove: {
+				from: { x: 1, y: 1 },
+				to: { x: 2, y: 2 }
+			},
 			black: "5678",
 			white: "9012",
 			state: GameState.DONE
@@ -41,6 +45,8 @@ class GameRecordPersistenceTest extends Test
 		Assert.equals("5678", game.black);
 		Assert.equals("9012", game.white);
 		Assert.equals(GameState.DONE, game.state);
+		Assert.equals(1, game.lastMove.from.y);
+		Assert.equals(2, game.lastMove.to.x);
 	}
 
 	public function testSave() {
@@ -63,5 +69,6 @@ class GameRecordPersistenceTest extends Test
 		Assert.equals(false, Reflect.field(game, 'canPass'));
 		Assert.equals("00000000111111112222222200000000", Reflect.field(game, 'board'));
 		Assert.equals(GameState.WAITING, Reflect.field(game, 'state'));
+		Assert.isTrue(Reflect.hasField(game, 'lastMove'));
 	}
 }

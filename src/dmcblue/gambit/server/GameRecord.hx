@@ -5,7 +5,9 @@ import interealmGames.common.uuid.UuidV4;
 import interealmGames.common.uuid.UuidV4;
 import dmcblue.gambit.server.GameRecordObject;
 import dmcblue.gambit.Board;
+import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
+import dmcblue.gambit.Position;
 import dmcblue.gambit.server.errors.InvalidInputError;
 import interealmGames.common.uuid.Uuid;
 
@@ -25,6 +27,13 @@ class GameRecord {
 	}
 
 	static public function fromObject(game:GameRecordObject):GameRecord {
+		var lastMove = null;
+		if(game.lastMove != null) {
+			lastMove = {
+				from: new Position(game.lastMove.from.x, game.lastMove.from.y),
+				to: new Position(game.lastMove.to.x, game.lastMove.to.y)
+			};
+		}
 		return new GameRecord(
 			game.id,
 			game.currentPlayer,
@@ -32,7 +41,8 @@ class GameRecord {
 			game.canPass,
 			game.black,
 			game.white,
-			game.state
+			game.state,
+			lastMove
 		);
 	}
 
@@ -40,6 +50,7 @@ class GameRecord {
 	public var board:Board;
 	public var currentPlayer:Piece;
 	public var canPass:Bool = false;
+	public var lastMove:Move = null;
 	public var opposingPlayer:Piece;
 	public var black:UuidV4;
 	public var white:UuidV4;
@@ -52,7 +63,8 @@ class GameRecord {
 		canPass:Bool,
 		black:UuidV4,
 		white:UuidV4,
-		state:GameState
+		state:GameState,
+		?lastMove:Move
 	) {
 		this.id = id;
 		this.currentPlayer = currentPlayer;
@@ -62,10 +74,16 @@ class GameRecord {
 		this.white = white;
 		this.state = state;
 		this.opposingPlayer = this.currentPlayer == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
+		this.lastMove = lastMove;
 	}
 
 	public function currentPlayerId():UuidV4 {
 		return this.currentPlayer == Piece.BLACK ? this.black : this.white;
+	}
+
+	public function move(move:Move) {
+		this.board.move(move);
+		this.lastMove = move;
 	}
 
 	public function next():Void {
@@ -78,14 +96,24 @@ class GameRecord {
 	}
 
 	public function toObject():GameRecordObject {
-		return {
+		var obj = {
 			id: this.id,
 			currentPlayer: this.currentPlayer,
 			board: this.board.toString(),
 			canPass: this.canPass,
+			lastMove: null,
 			black: this.black,
 			white: this.white,
 			state: this.state
 		};
+
+		if (this.lastMove != null) {
+			obj.lastMove = {
+				from: this.lastMove.from.toPoint(),
+				to: this.lastMove.to.toPoint()
+			};
+		}
+
+		return obj;
 	}
 }

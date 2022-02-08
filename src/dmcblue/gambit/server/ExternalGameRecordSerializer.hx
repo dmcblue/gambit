@@ -16,16 +16,12 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 	private var sessionPlayer:UuidV4;
 	private var objectSerializer:ExternalGameRecordObjectSerializer;
 	private var persistence:ObjectPersistence<String, GameRecord>;
-	private var lastMove:Move;
 	public function new(
-		persistence:ObjectPersistence<String, GameRecord>,
-		sessionPlayer:UuidV4,
-		?lastMove:Move
+		persistence:ObjectPersistence<String, GameRecord>, sessionPlayer:UuidV4
 	) {
 		this.objectSerializer = new ExternalGameRecordObjectSerializer();
 		this.persistence = persistence;
 		this.sessionPlayer = sessionPlayer;
-		this.lastMove = lastMove;
 	}
 
 	public function decode(s:String):GameRecord {
@@ -39,7 +35,8 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 			board: gameRecord.board.toString(),
 			currentPlayer: gameRecord.currentPlayer,
 			canPass: gameRecord.canPass,
-			state: gameRecord.state
+			state: gameRecord.state,
+			lastMove: null
 		};
 
 		if (this.sessionPlayer != null) {
@@ -50,10 +47,10 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 			}
 		}
 
-		if (this.lastMove != null) {
+		if (gameRecord.lastMove != null) {
 			obj.lastMove = {
-				from: this.lastMove.from.toPoint(),
-				to: this.lastMove.to.toPoint()
+				from: gameRecord.lastMove.from.toPoint(),
+				to: gameRecord.lastMove.to.toPoint()
 			};
 		}
 
