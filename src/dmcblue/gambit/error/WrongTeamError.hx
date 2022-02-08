@@ -1,4 +1,4 @@
-package dmcblue.gambit.errors;
+package dmcblue.gambit.error;
 
 import dmcblue.gambit.Piece;
 import interealmGames.common.errors.Error;

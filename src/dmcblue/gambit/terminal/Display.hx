@@ -1,5 +1,6 @@
 package dmcblue.gambit.terminal;
 
+import haxe.io.Eof;
 import dmcblue.gambit.Display.StartChoice;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Piece;
@@ -14,6 +15,8 @@ import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.GameState;
 import interealmGames.common.uuid.Uuid;
 import interealmGames.common.uuid.UuidV4;
+import dmcblue.gambit.error.EndGameInterrupt;
+import dmcblue.gambit.server.parameters.MoveParams.MoveObject;
 
 typedef LevelChoice = {
 	choice:Int,
@@ -150,7 +153,7 @@ class Display implements DisplayInterface {
 		while (true) {
 			var input = Sys.stdin().readLine().toLowerCase();
 			if(input.charCodeAt(0) == 27) { //ESC
-				this.exit();
+				throw new EndGameInterrupt();
 			}
 
 			if(Uuid.isV4(input)) {
@@ -163,18 +166,22 @@ class Display implements DisplayInterface {
 
 	public function getResponse(options:Array<String>):String {
 		while (true) {
-			var input = Sys.stdin().readLine().toLowerCase();
-			if(input.charCodeAt(0) == 27) { //ESC
-				this.exit();
-			}
-			if(input.toLowerCase() == 'r') {
-				this.rules();
-			}
-			if(options.contains(input)) {
-				return input;
-			}
+			try {
+				var input = Sys.stdin().readLine().toLowerCase();
+				if(input.charCodeAt(0) == 27) { //ESC
+					throw new EndGameInterrupt();
+				}
+				if(input.toLowerCase() == 'r') {
+					this.rules();
+				}
+				if(options.contains(input)) {
+					return input;
+				}
 
-			Sys.print('Invalid reponse, please try again: ');
+				Sys.print('Invalid reponse, please try again: ');
+			} catch(e:Eof) {
+				throw new EndGameInterrupt();
+			}
 		}
 	}
 
@@ -257,7 +264,7 @@ class Display implements DisplayInterface {
 	public function requestFollowUpMove(currentPlayer:Piece, position:Position, moves:Array<Position>):Null<Move> {
 		var teamStr = this.pieceToString(currentPlayer);
 		var positionStr = this.positionToString(position);
-		Sys.println('$currentPlayer ($teamStr) has a follow-up move for Position "$positionStr":');
+		Sys.println('($teamStr) has a follow-up move for Position "$positionStr":');
 		Sys.println('The following moves are available:');
 		for(i in 0...moves.length) {
 			var position = this.positionToString(moves[i]);
@@ -356,5 +363,11 @@ class Display implements DisplayInterface {
 		Sys.println('');
 		Sys.println(this.boardToString(board));
 		Sys.println('');
+	}
+
+	public function showLastMove(movedPlayer:Piece, move:MoveObject):Void {
+		Sys.println('${this.pieceToString(movedPlayer)} moved');
+		Sys.println('  from (${move.from.x}, ${move.from.y})');
+		Sys.println('  to   (${move.to.x}, ${move.to.y})');
 	}
 }

@@ -1,5 +1,6 @@
 package dmcblue.gambit;
 
+import haxe.io.Eof;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Display.StartChoice;
 import interealmGames.common.uuid.UuidV4;
@@ -19,6 +20,7 @@ import dmcblue.gambit.Display;
 import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.Api;
 import dmcblue.gambit.server.parameters.AiMoveParams;
+import dmcblue.gambit.error.EndGameInterrupt;
 
 using haxe.EnumTools;
 
@@ -30,7 +32,9 @@ class GameManager {
 	private var api:Api;
 	private var display:Display;
 	private var lastPosition:Position;
+	private var needUpdate:Bool = false;
 	private var playerId:UuidV4;
+	private var isPlaying:Bool = false;
 	private var gameId:UuidV4;
 	private var team:Piece;
 
@@ -54,7 +58,7 @@ class GameManager {
 		this.gameId = null;
 	}
 
-	public function check(withUpdate:Bool) {
+	public function check() {
 		this.api.get(this.gameId, function(game:ExternalGameRecordObject, error: ErrorObject) {
 			if (error != null) {
 				this.display.displayError(new Error(
@@ -63,23 +67,25 @@ class GameManager {
 				));
 			} else {
 				var board = Board.fromString(game.board);
-				if(withUpdate) {
+				if(this.needUpdate) {
 					this.display.showBoard(
 						game.currentPlayer,
 						this.team == game.currentPlayer,
 						game.state,
 						board.board
 					);
+					this.needUpdate = false;
 				}
 				if (game.state == GameState.WAITING) {
-					haxe.Timer.delay(function() {
-						this.check(false);
-					}, 1000);
+					// haxe.Timer.delay(function() {
+					// 	this.check(false);
+					// }, 1000);
 				} else if (game.state == GameState.DONE) {
 					var scores:Map<Piece, Int> = new Map();
 					scores.set(Piece.BLACK, board.calculateScore(Piece.BLACK));
 					scores.set(Piece.WHITE, board.calculateScore(Piece.WHITE));
 					this.display.endGame(scores, board.board);
+					this.isPlaying = false;
 				} else if (game.currentPlayer == this.team) {
 					if (game.canPass) {
 						this.getFollowUpMove(board);
@@ -89,11 +95,11 @@ class GameManager {
 				}  else {
 					if (this.aiMode) {
 						this.getAiMove();
-					} else {
+						currentPlayer	} else {
 						// probably update display
-						haxe.Timer.delay(function() {
-							this.check(false);
-						}, 1000);
+						// haxe.Timer.delay(function() {
+						// 	this.check(false);
+						// }, 1000);
 					}
 				}
 			}
@@ -113,6 +119,7 @@ class GameManager {
 				));
 			} else {
 				var board = Board.fromString(game.board);
+				this.display.showLastMove(this.opposingTeam(), game.lastMove);
 				this.display.showBoard(
 					game.currentPlayer,
 					this.team == game.currentPlayer,
@@ -120,7 +127,7 @@ class GameManager {
 					board.board
 				);
 				// this.check(true);
-				this.check(false);
+				// this.check(false);
 			}
 		});
 	}
@@ -144,7 +151,8 @@ class GameManager {
 					this.joinAi();
 				} else {
 					this.display.invite(this.gameId);
-					this.check(true);
+					// this.check(true);
+					this.needUpdate = true;
 				}
 			}
 		});
@@ -158,7 +166,8 @@ class GameManager {
 					error.message
 				));
 			} else {
-				this.check(true);
+				// this.check(true);
+				this.needUpdate = true;
 			}
 		});
 	}
@@ -170,7 +179,7 @@ class GameManager {
 	// for this and next, need some confirmation for the user,
 	// not sure if that is display or this
 	public function getMove(board:Board):Void {
-		this.display.showBoard(this.team, true, GameState.PLAYING, board.board);
+		// this.display.showBoard(this.team, true, GameState.PLAYING, board.board);
 		var from = this.display.requestNextMoveFrom(this.team, board.getPositionsWithMoves(this.team));
 		var moves = board.getMoves(from);
 		var to = this.display.requestNextMoveTo(this.team, moves);
@@ -197,7 +206,8 @@ class GameManager {
 						error.message
 					));
 				}
-				this.check(true);
+				// this.check(true);
+				this.needUpdate = true;
 			});
 		}
 	}
@@ -213,7 +223,8 @@ class GameManager {
 				this.gameId = game.id;
 				this.playerId = game.player;
 				this.team = game.team;
-				this.check(true);
+				// this.check(true);
+				this.needUpdate = true;
 			}
 		});
 	}
@@ -237,11 +248,42 @@ class GameManager {
 			} else {
 				this.lastPosition = move.to;
 			}
-			this.check(true);
+			// this.check(true);
+			// this.needUpdate = true;
+			this.display.showBoard(
+				game.currentPlayer,
+				this.team == game.currentPlayer,
+				game.state,
+				board.board
+			);
 		});
 	}
 
 	public function run() {
+		var running = true;
+		while(running) {
+			try {
+				this.start();
+				while(this.isPlaying) {
+					this.check();
+					Sys.sleep(1);
+				}
+				running = this.display.playAgain();
+			} catch(interrupt:EndGameInterrupt) {
+				running = false;
+			} catch(error:Error) {
+				this.display.displayError(error);
+			} catch(error:Eof) {
+				running = false; // force quit
+				Sys.println('');
+			} catch(e) {
+				trace(e);
+			}
+		}
+		this.display.exit();
+	}
+
+	public function start() {
 		var choice = this.display.getGameStart();
 		if (choice == StartChoice.AI || choice == StartChoice.CREATE) {
 			this.aiMode = choice == StartChoice.AI;
@@ -252,5 +294,6 @@ class GameManager {
 		} else if (choice == StartChoice.JOIN) {
 			this.join(this.display.getGameId());
 		}
+		this.isPlaying = true;
 	}
 }

@@ -5,7 +5,7 @@ import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.Board;
-import dmcblue.gambit.errors.NotIslandError;
+import dmcblue.gambit.error.NotIslandError;
 import utest.Assert;
 import utest.Async;
 import utest.Test;

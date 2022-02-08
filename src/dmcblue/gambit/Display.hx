@@ -6,6 +6,7 @@ import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.GameState;
+import dmcblue.gambit.server.parameters.MoveParams.MoveObject;
 import interealmGames.common.errors.Error;
 import interealmGames.common.uuid.UuidV4;
 
@@ -30,6 +31,8 @@ interface Display {
 	**/
 	public function endGame(scores:Map<Piece,Int>, board:Array<Array<Piece>>):Void;
 
+	public function exit():Void;
+
 	public function getGameId():UuidV4;
 
 	public function getTeamChoice():Piece;
@@ -38,6 +41,8 @@ interface Display {
 		Display the invite
 	**/
 	public function invite(gameId:String):Void;
+
+	public function playAgain():Bool;
 
 	/**
 		Gets the move continuing a multistage jump
@@ -57,4 +62,6 @@ interface Display {
 		Display the current game state
 	**/
 	public function showBoard(currentPlayer:Piece, isMe:Bool, gameState:GameState, board:Array<Array<Piece>>):Void;
+
+	public function showLastMove(movedPlayer:Piece, move:MoveObject):Void;
 }

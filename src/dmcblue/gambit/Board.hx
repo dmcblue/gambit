@@ -4,8 +4,8 @@ import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.PieceTools;
 import dmcblue.gambit.Position;
-import dmcblue.gambit.errors.NotIslandError;
-import dmcblue.gambit.errors.OccupiedSpaceError;
+import dmcblue.gambit.error.NotIslandError;
+import dmcblue.gambit.error.OccupiedSpaceError;
 import interealmGames.common.errors.Error;
 
 using StringTools;
