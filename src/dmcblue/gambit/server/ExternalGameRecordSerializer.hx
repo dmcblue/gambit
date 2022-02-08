@@ -1,6 +1,7 @@
 package dmcblue.gambit.server;
 
 import dmcblue.gambit.Piece;
+import dmcblue.gambit.Move;
 import interealmGames.common.uuid.UuidV4;
 import dmcblue.gambit.server.ExternalGameRecordObject;
 import dmcblue.gambit.server.ExternalGameRecordObject;
@@ -15,10 +16,16 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 	private var sessionPlayer:UuidV4;
 	private var objectSerializer:ExternalGameRecordObjectSerializer;
 	private var persistence:ObjectPersistence<String, GameRecord>;
-	public function new(persistence:ObjectPersistence<String, GameRecord>, sessionPlayer:UuidV4) {
+	private var lastMove:Move;
+	public function new(
+		persistence:ObjectPersistence<String, GameRecord>,
+		sessionPlayer:UuidV4,
+		?lastMove:Move
+	) {
 		this.objectSerializer = new ExternalGameRecordObjectSerializer();
 		this.persistence = persistence;
 		this.sessionPlayer = sessionPlayer;
+		this.lastMove = lastMove;
 	}
 
 	public function decode(s:String):GameRecord {
@@ -41,6 +48,13 @@ class ExternalGameRecordSerializer implements Serializer<GameRecord> {
 			if (gameRecord.black != "" || gameRecord.white != "") {
 				obj.team = gameRecord.black == this.sessionPlayer ? Piece.BLACK : Piece.WHITE;
 			}
+		}
+
+		if (this.lastMove != null) {
+			obj.lastMove = {
+				from: this.lastMove.from.toPoint(),
+				to: this.lastMove.to.toPoint()
+			};
 		}
 
 		return this.objectSerializer.encode(obj);

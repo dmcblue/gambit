@@ -147,7 +147,7 @@ class Handlers {
 				}
 
 				persistence.save(game);
-				var serializer = new ExternalGameRecordSerializer(persistence, playerId);
+				var serializer = new ExternalGameRecordSerializer(persistence, playerId, move);
 				return serializer.encode(game);
 			}
 		};

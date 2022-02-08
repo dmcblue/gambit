@@ -56,6 +56,9 @@ class ApiAiMoveTest extends Test
 			Assert.equals(GameState.PLAYING, Reflect.field(game, 'state'));
 			Assert.isTrue(Reflect.hasField(game, 'player'));
 			Assert.equals(otherPlayerId, Reflect.field(game, 'player'));
+			Assert.isTrue(Reflect.hasField(game, 'lastMove'));
+			Assert.isTrue(Reflect.hasField(game.lastMove, 'from'));
+			Assert.isTrue(Reflect.hasField(game.lastMove, 'to'));
 			async.done();
 		});
 	}
