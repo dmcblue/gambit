@@ -77,9 +77,7 @@ class GameManager {
 					this.needUpdate = false;
 				}
 				if (game.state == GameState.WAITING) {
-					// haxe.Timer.delay(function() {
-					// 	this.check(false);
-					// }, 1000);
+					return;
 				} else if (game.state == GameState.DONE) {
 					var scores:Map<Piece, Int> = new Map();
 					scores.set(Piece.BLACK, board.calculateScore(Piece.BLACK));
@@ -94,8 +92,8 @@ class GameManager {
 					}
 				}  else {
 					if (this.aiMode) {
-						this.getAiMove();
-						currentPlayer	} else {
+						this.getAiMove();	
+					} else {
 						// probably update display
 						// haxe.Timer.delay(function() {
 						// 	this.check(false);
@@ -275,7 +273,6 @@ class GameManager {
 				this.display.displayError(error);
 			} catch(error:Eof) {
 				running = false; // force quit
-				Sys.println('');
 			} catch(e) {
 				trace(e);
 			}

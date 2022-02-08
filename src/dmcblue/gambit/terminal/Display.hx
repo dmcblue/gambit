@@ -142,6 +142,8 @@ class Display implements DisplayInterface {
 		Savely ends the program
 	**/
 	public function exit() {
+		Sys.println('');
+		Sys.println('');
 		Sys.println('Goodbye');
 		Sys.exit(0);
 	}
