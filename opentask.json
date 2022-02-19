@@ -1,29 +1,29 @@
 {
-	"version": "0.1.0",
+	"version": "0.3.0",
+
+	"lookupCommand": "which",
+	"windows": {
+		"lookupCommand": "where"
+	},
 	
 	"requirements": [{
 		"name": "git",
 		"command": "git"
 	},{
 		"name": "haxe",
-		"command": "haxe",
-		"testArgument": "-version"
+		"command": "haxe"
 	},{
 		"name": "copy",
 		"command": "cp",
-		"testArgument": "-version",
 		"windows": {
-			"command": "copy",
-			"testArgument": "/?"
+			"command": "copy"
 		}
 	},{
 		"name": "sed",
-		"command": "sed",
-		"testArgument": "'s/ga/ga/g' <<< 'ga'"
+		"command": "sed"
 	},{
 		"name": "haxelib",
-		"command": "haxelib",
-		"testArgument": "version"
+		"command": "haxelib"
 	}],
 		
 	"tasks": [{
