@@ -14,7 +14,6 @@ class Main
 		var api = new Api(apiConnection, "http://0.0.0.0:8080");
 		var display = new Display();
 		var game = new GameManager(api, display);
-		display.greetings();
 		game.run();
 	}
 }

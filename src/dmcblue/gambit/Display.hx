@@ -18,8 +18,6 @@ enum StartChoice {
 }
 
 interface Display {
-	public function getGameStart():StartChoice;
-	public function getAiLevel():Level;
 
 	/**
 		Output error to user.
@@ -27,14 +25,38 @@ interface Display {
 	public function displayError(error:Error):Void;
 
 	/**
+		Output error to user.
+	**/
+	public function displayGameId(gameId:UuidV4):Void;
+
+	/**
 		Shows the results of the game (winner, score, etc)
 	**/
 	public function endGame(scores:Map<Piece,Int>, board:Array<Array<Piece>>):Void;
 
+	/**
+		Signals the UI that the program will exit
+	**/
 	public function exit():Void;
 
+	/**
+		Retrieve difficulty level
+	**/
+	public function getAiLevel():Level;
+
+	/**
+		Retreives a game id to join
+	**/
 	public function getGameId():UuidV4;
 
+	/**
+		Retreive type of game to play
+	**/
+	public function getGameStart():StartChoice;
+
+	/**
+		Retrieves whether the player wants to go first or second
+	**/
 	public function getTeamChoice():Piece;
 
 	/**
@@ -42,6 +64,9 @@ interface Display {
 	**/
 	public function invite(gameId:String):Void;
 
+	/**
+		Retrieves whether player wants to play another round
+	**/
 	public function playAgain():Bool;
 
 	/**
@@ -63,5 +88,8 @@ interface Display {
 	**/
 	public function showBoard(currentPlayer:Piece, isMe:Bool, gameState:GameState, board:Array<Array<Piece>>):Void;
 
+	/**
+		Describes the last move made
+	**/
 	public function showLastMove(movedPlayer:Piece, move:MoveObject):Void;
 }

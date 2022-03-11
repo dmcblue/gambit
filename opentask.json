@@ -24,6 +24,9 @@
 	},{
 		"name": "haxelib",
 		"command": "haxelib"
+	},{
+		"name": "php",
+		"command": "php"
 	}],
 		
 	"tasks": [{
@@ -214,6 +217,17 @@
 			"--main", "dmcblue.gambit.Main"
 		]
 	},{
+		"name": "build:main",
+		"description": "Build",
+		"groups": [],
+		"command": "haxe",
+		"arguments": [
+			"-cp", "src",
+			"-cp", "common/src",
+			"--cpp", "bin/test",
+			"-main", "dmcblue.gambit.Main"
+		]
+	},{
 		"name": "run:ai",
 		"description": "Runs",
 		"groups": [{
@@ -231,11 +245,22 @@
 	},
 
 	{
-		"name": "build:cpp",
+		"name": "build:terminal:php",
+		"description": "Makes combo haxe/cpp files",
+		"groups": [{
+			"name": "build:terminal",
+			"rank": 1
+		}],
+		"command": "php",
+		"arguments": [
+			"src/dmcblue/gambit/terminal/make.php"
+		]
+	},{
+		"name": "build:terminal:cpp",
 		"description": "Transpiles Haxe to C++",
 		"groups": [{
-			"name": "build",
-			"rank": 1
+			"name": "build:terminal",
+			"rank": 2
 		}],
 		"command": "haxe",
 		"arguments": [
@@ -248,11 +273,11 @@
 			"-main", "dmcblue.gambit.terminal.Main"
 		]
 	},{
-		"name": "build:copy",
+		"name": "build:terminal:copy",
 		"description": "Copies the executable into the /bin root and renames",
 		"groups": [{
-			"name": "build",
-			"rank": 2
+			"name": "build:terminal",
+			"rank": 3
 		}],
 		"command": "cp",
 		"arguments": ["bin/cpp/Main", "bin/gambit"],

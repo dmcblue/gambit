@@ -30,6 +30,7 @@ class GameManager {
 	private var aiLevel:Level;
 	private var aiMode:Bool;
 	private var api:Api;
+	private var currentPlayer:Piece;
 	private var display:Display;
 	private var lastPosition:Position;
 	private var needUpdate:Bool = false;
@@ -49,6 +50,8 @@ class GameManager {
 					GameManager.ERROR_TYPE,
 					'Service not available'
 				));
+				this.display.exit();
+				throw new EndGameInterrupt();
 			}
 		});
 	}
@@ -66,6 +69,19 @@ class GameManager {
 					error.message
 				));
 			} else {
+				if (game.state == GameState.WAITING) {
+					if(this.needUpdate) {
+						this.display.displayGameId(this.gameId);
+						this.needUpdate = false;
+					}
+					return;
+				}
+
+				if (game.currentPlayer != this.currentPlayer) {
+					this.needUpdate = true;
+				}
+				this.currentPlayer = game.currentPlayer;
+
 				var board = Board.fromString(game.board);
 				if(this.needUpdate) {
 					this.display.showBoard(
@@ -76,15 +92,17 @@ class GameManager {
 					);
 					this.needUpdate = false;
 				}
-				if (game.state == GameState.WAITING) {
-					return;
-				} else if (game.state == GameState.DONE) {
+				
+				if (game.state == GameState.DONE) {
 					var scores:Map<Piece, Int> = new Map();
 					scores.set(Piece.BLACK, board.calculateScore(Piece.BLACK));
 					scores.set(Piece.WHITE, board.calculateScore(Piece.WHITE));
 					this.display.endGame(scores, board.board);
 					this.isPlaying = false;
-				} else if (game.currentPlayer == this.team) {
+					return;
+				}
+
+				if (game.currentPlayer == this.team) {
 					if (game.canPass) {
 						this.getFollowUpMove(board);
 					} else {
@@ -93,11 +111,6 @@ class GameManager {
 				}  else {
 					if (this.aiMode) {
 						this.getAiMove();	
-					} else {
-						// probably update display
-						// haxe.Timer.delay(function() {
-						// 	this.check(false);
-						// }, 1000);
 					}
 				}
 			}
@@ -124,8 +137,6 @@ class GameManager {
 					game.state,
 					board.board
 				);
-				// this.check(true);
-				// this.check(false);
 			}
 		});
 	}
@@ -149,8 +160,8 @@ class GameManager {
 					this.joinAi();
 				} else {
 					this.display.invite(this.gameId);
-					// this.check(true);
 					this.needUpdate = true;
+					this.currentPlayer = Piece.WHITE;
 				}
 			}
 		});
@@ -221,6 +232,7 @@ class GameManager {
 				this.gameId = game.id;
 				this.playerId = game.player;
 				this.team = game.team;
+				this.currentPlayer = Piece.BLACK;
 				// this.check(true);
 				this.needUpdate = true;
 			}
@@ -290,6 +302,7 @@ class GameManager {
 			this.create(this.display.getTeamChoice());
 		} else if (choice == StartChoice.JOIN) {
 			this.join(this.display.getGameId());
+			this.needUpdate = true;
 		}
 		this.isPlaying = true;
 	}

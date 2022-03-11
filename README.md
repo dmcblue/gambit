@@ -74,3 +74,9 @@ Alternatively, you can read `opentask.json` for the list of explicit commands.
 - Requires Redis to be installed and running
 - If using PHP:
 	- Make sure the `sockets` extension is enabled in `php.ini`.
+
+## Terminal
+
+Reference: https://invisible-island.net/ncurses/man/ncurses.3x.html
+https://github.com/tony/NCURSES-Programming-HOWTO-examples/blob/master/16-panels/show-hide.c
+https://tldp.org/HOWTO/NCURSES-Programming-HOWTO/menus.html
