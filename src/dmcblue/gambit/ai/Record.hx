@@ -46,16 +46,16 @@ class Record {
 		return PieceTools.fromString(this.name.charAt(0));
 	}
 
-
-	// doesn't take into account canPass
 	public function createChildren() {
 		this.children = [];
 		var team = this.team();
 		var board = this.board();
 		var boardStr = this.name.substring(1);
+
 		if(board.hasAnyMoreMoves(team)) {
 			var opposingTeam = team == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
 			var positions = board.getPositionsWithMoves(team);
+
 			for(from in positions) {
 				var tos = board.getMoves(from);
 				for(to in tos) {
@@ -72,12 +72,10 @@ class Record {
 						});
 					}
 
-					if (tempBoard.hasAnyMoreMoves(opposingTeam)) {
-						this.children.push({
-							name: Record.createName(opposingTeam, tempBoard),
-							success: -1
-						});
-					} // else DONE
+					this.children.push({
+						name: Record.createName(opposingTeam, tempBoard),
+						success: -1
+					});
 				}
 			}
 		}

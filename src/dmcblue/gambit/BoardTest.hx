@@ -10,10 +10,10 @@ import utest.Assert;
 import utest.Async;
 import utest.Test;
 
-typedef MidPointTest = {
-	var here: Position;
-	var there: Position;
-	var expected: Position;
+typedef CalculateScoreTest = {
+	var board: String;
+	var team: Piece;
+	var expected: Int;
 };
 
 typedef GetIslandTest = {
@@ -23,15 +23,21 @@ typedef GetIslandTest = {
 	var expected: Array<Position>;
 };
 
-typedef IsOverTest = {
+typedef GetMovesTest = {
 	var board: String;
+	var position: Position;
+	var moves:Array<Position>;
+};
+
+typedef HasAnyMoreMovesTest = {
+	var board: String;
+	var team: Piece;
 	var expected: Bool;
 };
 
-typedef CalculateScoreTest = {
+typedef IsOverTest = {
 	var board: String;
-	var team: Piece;
-	var expected: Int;
+	var expected: Bool;
 };
 
 typedef IsValidMoveTest = {
@@ -39,10 +45,16 @@ typedef IsValidMoveTest = {
 	var expected:Bool;
 };
 
+typedef MidPointTest = {
+	var here: Position;
+	var there: Position;
+	var expected: Position;
+};
+
 class BoardTest extends Test 
 {
 	/**
-	 * Basic tests for capitalization
+	 * constructor
 	 */
 	public function testConstructor() {
 		var board = new Board();
@@ -51,7 +63,7 @@ class BoardTest extends Test
 	}
 
 	/**
-	 * Basic tests for capitalization
+	 * getPositions
 	 */
 	public function testGetPositions() {
 		var board = Board.newGame();
@@ -61,7 +73,7 @@ class BoardTest extends Test
 	}
 
 	/**
-	 * Basic tests for capitalization
+	 * fromString
 	 */
 	public function testFromString() {
 		var str =
@@ -73,9 +85,23 @@ class BoardTest extends Test
 
 		Assert.equals(Piece.WHITE, board.board[1][0]);
 	}
+
+	public function testHasAnyMoreMoves() {
+		var tests:Array<HasAnyMoreMovesTest> = [{
+			board: '20002000000010000002000001000011',
+			team: Piece.WHITE,
+			expected: true
+		}];
+
+		for(test in tests) {
+			var board = Board.fromString(test.board);
+			var actual = board.hasAnyMoreMoves(test.team);
+			Assert.equals(test.expected, actual);
+		}
+	}
 	
 	/**
-	 * Basic tests for capitalization
+	 * midPoint()
 	 */
 	public function testMidPoint() {
 		var tests:Array<MidPointTest> = [{
@@ -92,26 +118,40 @@ class BoardTest extends Test
 	}
 
 	/**
-	 * Basic tests for capitalization
+	 * getMoves()
 	 */
 	public function testGetMoves() {
-		var str =
-			'00000000' +
-			'12000000' +
-			'22000000' +
-			'00000000';
-		var board = Board.fromString(str);
-
-		var position = new Position(0, 1);
-		var moves = board.getMoves(position);
-		var expectedMoves:Array<Position> = [
-			new Position(0, 3),
-			new Position(2, 3),
-			new Position(2, 1)
-		];
-		Assert.equals(expectedMoves.length, moves.length);
-		for(expectedMove in expectedMoves) {
-			Assert.isTrue(this.contains(moves, expectedMove), '$expectedMove');
+		var tests:Array<GetMovesTest> = [{
+			board: 
+				'00000000' +
+				'12000000' +
+				'22000000' +
+				'00000000',
+			position: new Position(0, 1),
+			moves: [
+				new Position(0, 3),
+				new Position(2, 3),
+				new Position(2, 1)
+			]
+		}, {
+			board: 
+				'20002000' +
+				'00001000' +
+				'00020000' +
+				'01000011',
+			position: new Position(4, 1),
+			moves: [
+				new Position(2, 3)
+			]
+		}];
+		
+		for(test in tests) {
+			var board = Board.fromString(test.board);
+			var moves = board.getMoves(test.position);
+			Assert.equals(test.moves.length, moves.length);
+			for(expectedMove in test.moves) {
+				Assert.isTrue(this.contains(moves, expectedMove), '$expectedMove');
+			}
 		}
 	}
 
