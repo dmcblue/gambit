@@ -50,8 +50,7 @@ class GameManager {
 					GameManager.ERROR_TYPE,
 					'Service not available'
 				));
-				this.display.exit();
-				throw new EndGameInterrupt();
+				this.exit();
 			}
 		});
 	}
@@ -71,7 +70,6 @@ class GameManager {
 			} else {
 				if (game.state == GameState.WAITING) {
 					if(this.needUpdate) {
-						this.display.displayGameId(this.gameId);
 						this.needUpdate = false;
 					}
 					return;
@@ -117,6 +115,10 @@ class GameManager {
 		});
 	}
 
+	public function exit() {
+		this.display.exit();
+	}
+
 	public function getAiMove() {
 		var params:AiMoveParams = {
 			level: this.aiLevel,
@@ -137,6 +139,7 @@ class GameManager {
 					game.state,
 					board.board
 				);
+				Sys.sleep(1);
 			}
 		});
 	}
@@ -175,7 +178,6 @@ class GameManager {
 					error.message
 				));
 			} else {
-				// this.check(true);
 				this.needUpdate = true;
 			}
 		});
@@ -188,7 +190,6 @@ class GameManager {
 	// for this and next, need some confirmation for the user,
 	// not sure if that is display or this
 	public function getMove(board:Board):Void {
-		// this.display.showBoard(this.team, true, GameState.PLAYING, board.board);
 		var from = this.display.requestNextMoveFrom(this.team, board.getPositionsWithMoves(this.team));
 		var moves = board.getMoves(from);
 		var to = this.display.requestNextMoveTo(this.team, moves);
@@ -215,7 +216,6 @@ class GameManager {
 						error.message
 					));
 				}
-				// this.check(true);
 				this.needUpdate = true;
 			});
 		}
@@ -233,7 +233,6 @@ class GameManager {
 				this.playerId = game.player;
 				this.team = game.team;
 				this.currentPlayer = Piece.BLACK;
-				// this.check(true);
 				this.needUpdate = true;
 			}
 		});
@@ -258,8 +257,6 @@ class GameManager {
 			} else {
 				this.lastPosition = move.to;
 			}
-			// this.check(true);
-			// this.needUpdate = true;
 			this.display.showBoard(
 				game.currentPlayer,
 				this.team == game.currentPlayer,
@@ -289,7 +286,7 @@ class GameManager {
 				trace(e);
 			}
 		}
-		this.display.exit();
+		this.exit();
 	}
 
 	public function start() {
