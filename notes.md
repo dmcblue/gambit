@@ -4,8 +4,9 @@
 
 - resume game
 - add ai to game manager
-- Update board with response, not check
-- Better game serialization for space issues
+- Rematch
+- Forfeit
 
+## Resources
 
 https://invisible-island.net/ncurses/man/ncurses.3x.html
