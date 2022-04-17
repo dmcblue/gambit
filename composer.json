@@ -1,0 +1,15 @@
+{
+    "name": "dmcblue/gambit",
+    "authors": [
+        {
+            "name": "dmcblue",
+            "email": "dmcblue@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.4"
+    },
+	"scripts": {
+        "serve": "php -S 0.0.0.0:9000 -t bin/web"
+    }
+}

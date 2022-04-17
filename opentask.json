@@ -19,6 +19,9 @@
 			"command": "copy"
 		}
 	},{
+		"name": "mkdir",
+		"command": "mkdir"
+	},{
 		"name": "sed",
 		"command": "sed"
 	},{
@@ -331,5 +334,77 @@
 				"bin/index.php"
 			]
 		}
+	},
+
+	{
+		"name": "build:web:dir",
+		"description": "Create dist dir",
+		"groups": [{
+			"name": "build:web",
+			"rank": 2
+		}],
+		"command": "mkdir",
+		"arguments": [
+			"-p",
+			"bin/web"
+		]
+	}, {
+		"name": "build:web:html",
+		"description": "Generate HTML",
+		"groups": [{
+			"name": "build:web",
+			"rank": 2
+		}],
+		"command": "php",
+		"arguments": [
+			"src/dmcblue/gambit/web/index.php",
+			"bin/web/index.html"
+		]
+	}, {
+		"name": "build:web:assets",
+		"description": "Copy Assets",
+		"groups": [{
+			"name": "build:web",
+			"rank": 2
+		}],
+		"command": "cp",
+		"arguments": [
+			"-r",
+			"src/dmcblue/gambit/web/assets/",
+			"bin/web/"
+		]
+	}, {
+		"name": "build:web:js",
+		"description": "Transpiles Haxe to JS",
+		"groups": [{
+			"name": "build:web",
+			"rank": 1
+		}],
+		"command": "haxe",
+		"arguments": [
+			"-lib", "haxe-crypto",
+			"-cp", "src",
+			"-cp", "browser/src",
+			"-cp", "common/src",
+			"-cp", "server/src",
+			"-js", "bin/web/gambit.js",
+			"-main", "dmcblue.gambit.web.Main"
+		]
+	},
+
+	{
+		"name": "run:web",
+		"description": "Serves the web app",
+		"groups": [{
+			"name": "run:web",
+			"rank": 1
+		}],
+		"command": "php",
+		"arguments": [
+			"-S",
+			"0.0.0.0:9000",
+			"-t",
+			"bin/web"
+		]
 	}]
 }
