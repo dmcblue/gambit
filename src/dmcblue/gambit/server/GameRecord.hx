@@ -81,6 +81,15 @@ class GameRecord {
 		return this.currentPlayer == Piece.BLACK ? this.black : this.white;
 	}
 
+	public function isFollowUpMove():Bool {
+		if(this.lastMove == null) {
+			return false;
+		}
+
+		var lastTeam = this.board.pieceAt(this.lastMove.to);
+		return lastTeam == this.currentPlayer;
+	}
+
 	public function move(move:Move) {
 		this.board.move(move);
 		this.lastMove = move;
@@ -89,6 +98,9 @@ class GameRecord {
 	public function next():Void {
 		this.canPass = false;
 		this.currentPlayer = this.currentPlayer == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
+		if(!this.board.hasAnyMoreMoves(this.currentPlayer)) {
+			this.state = GameState.DONE;
+		}
 	}
 
 	public function opposingPlayerId():UuidV4 {

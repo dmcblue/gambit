@@ -1,10 +1,25 @@
 package dmcblue.gambit.ai;
 
+import dmcblue.gambit.Position;
+import dmcblue.gambit.Position;
 import utest.Assert;
 import utest.Async;
 import utest.Test;
+import dmcblue.gambit.Board;
+import dmcblue.gambit.Move;
 import dmcblue.gambit.Piece;
 import dmcblue.gambit.Position;
+import dmcblue.gambit.ai.Ai;
+import dmcblue.gambit.ai.Level;
+import dmcblue.gambit.ai.Record;
+import dmcblue.gambit.ai.RecordPersistence;
+import interealmGames.persistence.MemoryConnection;
+
+typedef GetMoveTest = {
+	player:Piece,
+	board:String,
+	options:Array<Move>
+};
 
 typedef IndexToPositionTest = {
 	input:Int,
@@ -19,6 +34,53 @@ typedef MoveFromStringsTest = {
 };
 
 class AiTest extends Test {
+	public function testGetMove() {
+		var connection = new MemoryConnection();
+		var persistence = new RecordPersistence(connection);
+		var rec = new Record(
+			"100200200" + 
+			"10010000" + 
+			"02000002" + 
+			"00100001",
+			[{
+				name:
+					"200200200" + 
+					"10010001" + 
+					"02000002" + 
+					"00100000",
+				success: 0
+			}]
+		);
+		persistence.save(rec);
+		var ai = new Ai(persistence);
+		var tests:Array<GetMoveTest> = [{
+			// success is 0, can cause division error
+			player: Piece.WHITE,
+			board:
+				"00200200" + 
+				"10010000" + 
+				"02000002" + 
+				"00100001",
+			options: [{
+				from: new Position(7, 3),
+				to:   new Position(7, 1)
+			}]
+		}];
+
+		for(test in tests) {
+			var board = Board.fromString(test.board);
+			var move = ai.getMove(Level.EASY, test.player, board);
+			var m = test.options.filter(function(m:Move) {
+				return m.from.x == move.from.x &&
+					m.from.y == move.from.y &&
+					m.to.x == move.to.x &&
+					m.to.y == move.to.y;
+			});
+			Assert.equals(1, m.length);
+			Assert.notNull(m[0]);
+		}
+	}
+
 	public function testIndexToPosition() {
 		var ai = new Ai(null);
 		var tests:Array<IndexToPositionTest> = [{

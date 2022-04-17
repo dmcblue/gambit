@@ -1,5 +1,7 @@
 package dmcblue.gambit.server;
 
+import dmcblue.gambit.Position;
+import dmcblue.gambit.Position;
 import interealmGames.server.http.Error;
 import interealmGames.server.http.ErrorObject;
 import interealmGames.common.uuid.Uuid;
@@ -8,6 +10,7 @@ import haxe.Json;
 import interealmGames.server.http.test.Request;
 import interealmGames.server.http.RequestType;
 import dmcblue.gambit.Piece;
+import dmcblue.gambit.PieceTools;
 import dmcblue.gambit.Position;
 import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.ai.Record;
@@ -63,6 +66,78 @@ class HandlersAiMoveTest extends Test
 		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
 		Assert.isTrue(Reflect.hasField(response, 'team'));
 		Assert.equals(Piece.WHITE, Reflect.field(response, 'team'));
+	}
+
+	public function testFollowUpMove() {
+		var boardStr =
+			"00200000"+
+			"10111011"+
+			"02220222"+
+			"00010000";
+		var board = Board.fromString(boardStr);
+		var playerId = Handlers.AI_PLAYER;
+		var otherPlayerId = Uuid.v4();
+		var game: GameRecord = new GameRecord(
+			"1234",
+			Piece.WHITE,
+			board,
+			true,
+			otherPlayerId, // black
+			playerId, // white
+			GameState.PLAYING,
+			{
+				from: new Position(5, 1),
+				to: new Position(3, 3)
+			}
+		);
+		Test.persistence.getGameRecordPersistence().save(game);
+		var record = Record.fromObject({
+			name: "1" + boardStr,
+			children:[{
+				"name":
+					"1" +
+					"00200000"+
+					"11111011"+
+					"02020222"+
+					"00000000",
+				"success":0
+			}, {
+				"name":
+					"1" +
+					"00200000"+
+					"10111001"+
+					"02220202"+
+					"00010010",
+				"success":1
+			}]
+		});	
+		Test.persistence.getAiRecordPersistence().save(record);
+		var params:AiMoveParams = {
+			level:  Level.HARD,
+			player: otherPlayerId
+		};
+		var request:Request = new Request({
+			url: "/game/1234/ai/move/",
+			data: Json.stringify(params),
+			type: RequestType.POST
+		});
+		var response:ExternalGameRecordObject = cast Json.parse(Test.server.handle(request));
+		Assert.equals(200, request.getStatus());
+		Assert.equals("1234", Reflect.field(response, 'id'));
+		Assert.equals(Piece.WHITE, Reflect.field(response, 'currentPlayer'));
+		Assert.equals(true, Reflect.field(response, 'canPass'));
+		Assert.equals(
+			"00200000"+
+			"11111011"+
+			"02020222"+
+			"00000000",
+			Reflect.field(response, 'board')
+		);
+		Assert.equals(GameState.PLAYING, Reflect.field(response, 'state'));
+		Assert.isTrue(Reflect.hasField(response, 'player'));
+		Assert.equals(otherPlayerId, Reflect.field(response, 'player'));
+		Assert.isTrue(Reflect.hasField(response, 'team'));
+		Assert.equals(Piece.BLACK, Reflect.field(response, 'team'));
 	}
 
 	public function testNotFound() {

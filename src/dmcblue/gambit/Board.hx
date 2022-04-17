@@ -93,6 +93,10 @@ class Board {
 		return score;
 	}
 
+	public function clone():Board {
+		return Board.fromString(this.toString());
+	}
+
 	/**
 		Given a position, returns all positions that form an island with that
 		position (including the given position).

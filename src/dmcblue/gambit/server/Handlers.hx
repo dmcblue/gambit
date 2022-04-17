@@ -25,6 +25,7 @@ import dmcblue.gambit.server.parameters.CreateParams;
 import dmcblue.gambit.server.parameters.MoveParams;
 import dmcblue.gambit.ai.Ai;
 import dmcblue.gambit.ai.Level;
+import sys.io.File;
 
 using interealmGames.common.StringToolsExtension;
 
@@ -124,10 +125,21 @@ class Handlers {
 				var level:Level = cast levelInt;
 
 				var ai = new Ai(this.persistence.getAiRecordPersistence());
-				var move = ai.getMove(level, game.currentPlayer, game.board);
 
-				// Leave this in?
+				var move = null;
+				if(game.isFollowUpMove()) {
+					move = ai.getMoveFrom(level, game.currentPlayer, game.board, game.lastMove.to);
+				} else {
+					move = ai.getMove(level, game.currentPlayer, game.board);
+				}
+
 				if (!game.board.isValidMove(move)) {
+					File.saveContent(
+						'/home/dmcblue/repos/gambit/errrr',
+						Json.stringify(move) + '\n' + 
+						game.board.toString() + '\n' +
+						game.currentPlayer
+					);
 					throw ClientError.badRequest(Handlers.ERROR_GAME_INVALID_MOVE);
 				}
 
@@ -139,11 +151,12 @@ class Handlers {
 				if (game.board.getMoves(move.to).length > 0) {
 					game.canPass = true;
 				} else {
-					if (game.board.hasAnyMoreMoves(game.opposingPlayer)) {
-						game.next();
-					} else {
-						game.state = GameState.DONE;
-					}
+					// if (game.board.hasAnyMoreMoves(game.opposingPlayer)) {
+					// 	game.next();
+					// } else {
+					// 	game.state = GameState.DONE;
+					// }
+					game.next();
 				}
 
 				persistence.save(game);
@@ -260,11 +273,12 @@ class Handlers {
 				if (game.board.getMoves(move.to).length > 0) {
 					game.canPass = true;
 				} else {
-					if (game.board.hasAnyMoreMoves(game.opposingPlayer)) {
-						game.next();
-					} else {
-						game.state = GameState.DONE;
-					}
+					// if (game.board.hasAnyMoreMoves(game.opposingPlayer)) {
+					// 	game.next();
+					// } else {
+					// 	game.state = GameState.DONE;
+					// }
+					game.next();
 				}
 				// if (game.board) {
 				// 	game.state = GameState.DONE;
@@ -375,6 +389,7 @@ class Handlers {
 			try {
 				response = handler(request);
 			} catch(error:Error) {
+				// File.saveContent('/home/dmcblue/repos/gambit/err', Json.stringify(error));
 				request.setStatus(error.status);
 				return Json.stringify(error);
 			}
