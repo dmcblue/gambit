@@ -21,6 +21,8 @@ import dmcblue.gambit.ai.Level;
 import dmcblue.gambit.server.Api;
 import dmcblue.gambit.server.parameters.AiMoveParams;
 import dmcblue.gambit.error.EndGameInterrupt;
+import dmcblue.gambit.error.GameManagerError;
+import dmcblue.gambit.error.ApiError;
 
 using haxe.EnumTools;
 
@@ -46,10 +48,7 @@ class GameManager {
 
 		this.api.checkStatus(function(isAvailable) {
 			if (!isAvailable) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE,
-					'Service not available'
-				));
+				this.display.displayError(new GameManagerError());
 				this.exit();
 			}
 		});
@@ -63,10 +62,7 @@ class GameManager {
 	public function check() {
 		this.api.get(this.gameId, function(game:ExternalGameRecordObject, error: ErrorObject) {
 			if (error != null) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE_API,
-					error.message
-				));
+				this.display.displayError(new ApiError(error.message));
 			} else {
 				if (game.state == GameState.WAITING) {
 					if(this.needUpdate) {
@@ -126,10 +122,7 @@ class GameManager {
 		};
 		this.api.aiMove(this.gameId, params, function(game:ExternalGameRecordObject, error: ErrorObject) {
 			if (error != null) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE_API,
-					error.message
-				));
+				this.display.displayError(new ApiError(error.message));
 			} else {
 				var board = Board.fromString(game.board);
 				this.display.showLastMove(this.opposingTeam(), game.lastMove);
@@ -151,10 +144,7 @@ class GameManager {
 		};
 		this.api.create(params, function(game:ExternalGameRecordObject, error: ErrorObject) {
 			if (error != null) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE_API,
-					error.message
-				));
+				this.display.displayError(new ApiError(error.message));
 			} else {
 				this.gameId = game.id;
 				this.playerId = game.player;
@@ -173,10 +163,7 @@ class GameManager {
 	public function joinAi() {
 		this.api.aiJoin(this.gameId, function(game:ExternalGameRecordObject, error: ErrorObject) {
 			if (error != null) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE_API,
-					error.message
-				));
+				this.display.displayError(new ApiError(error.message));
 			} else {
 				this.needUpdate = true;
 			}
@@ -211,10 +198,7 @@ class GameManager {
 		} else {
 			this.api.pass(this.gameId, this.playerId, function(game:ExternalGameRecordObject, error:ErrorObject) {
 				if (error != null) {
-					this.display.displayError(new Error(
-						GameManager.ERROR_TYPE_API,
-						error.message
-					));
+					this.display.displayError(new ApiError(error.message));
 				}
 				this.needUpdate = true;
 			});
@@ -224,10 +208,7 @@ class GameManager {
 	public function join(gameId:UuidV4) {
 		this.api.join(gameId, function(game:ExternalGameRecordObject, error:ErrorObject) {
 			if (error != null) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE_API,
-					error.message
-				));
+				this.display.displayError(new ApiError(error.message));
 			} else {
 				this.gameId = game.id;
 				this.playerId = game.player;
@@ -250,10 +231,7 @@ class GameManager {
 		this.api.move(this.gameId, params, function(game:ExternalGameRecordObject, error:ErrorObject) {
 			var board = Board.fromString(game.board);
 			if (error != null) {
-				this.display.displayError(new Error(
-					GameManager.ERROR_TYPE_API,
-					error.message
-				));
+				this.display.displayError(new ApiError(error.message));
 			} else {
 				this.lastPosition = move.to;
 			}
