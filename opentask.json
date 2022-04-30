@@ -323,7 +323,7 @@
 		"command": "sed",
 		"arguments": [
 			"-i",
-			"s+Main::main+return Main::getHandlers+g",
+			"\"s+Main::main+return Main::getHandlers+g\"",
 			"bin/index.php"
 		],
 		"macos": {
@@ -406,5 +406,18 @@
 			"-t",
 			"bin/web"
 		]
+	},
+	
+	{
+		"name": "docker:build",
+		"description": "Builds a docker image",
+		"groups": [],
+		"command": "docker",
+		"arguments": [
+            "build",
+            "-t",
+			"dmcblue/gambit-server",
+            "."
+        ]
 	}]
 }

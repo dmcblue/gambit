@@ -21,7 +21,7 @@ class Main
 	}
 
 	static function getHandlers():Array<RequestHandler> {
-		new dotenv.Dotenv().load();
+		new dotenv.Dotenv('../.env').load();
 		var configPath = Sys.getEnv('GAMBIT_CONFIG_PATH');
 		var config:Config = cast Json.parse(File.getContent(configPath));
 		var serverConnection = ConnectionFactory.connection(config.gameConnection);
