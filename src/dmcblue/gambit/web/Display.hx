@@ -409,8 +409,7 @@ class Display implements DisplayInterface extends View {
 		@implements DisplayInterface
 	**/
 	public function invite(gameId:String):Void {
-		// this.showComponents('team');// ?
-		// this.showText('Join code: "${gameId}"');
+		this.showComponents();
 		this.showText(
 			'Your Game ID is:',
 			'    $gameId', 

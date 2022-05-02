@@ -70,8 +70,9 @@ p:last-child {
 	display:table;
 	height:100%;
 	width:100%;
-	background: url('background.png');
+	background: url('background.jpg');
 	background-size: cover;
+	background-position: center;
 }
 .page-row {
 	display: table-row;
